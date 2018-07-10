@@ -2,10 +2,10 @@
 title: "Veterans Affairs Patient Database (VAPD) ReadMe"
 author: "Shirley Wang"
 date: "June 28, 2018"
-output: html_document
+
 ---
 
-## Veterans Affairs Patient Database (VAPD 2014-2017): Building nationwide granular data for clinical discovery  {.tabset .tabset-fade .tabset-pills}
+## Veterans Affairs Patient Database (VAPD 2014-2017): Building nationwide granular data for clinical discovery 
 
 To study patient physiology throughout a period of acute hospitalization, we sought to create accessible, standardized nationwide data at the level of the individual patient-facility-day. This methodology paper summarizes the development, organization, and characteristics of the Veterans Affairs Patient Database 2014-2017 (VAPD 2014-2017). 
 
