@@ -1,6 +1,9 @@
 /*Below SQL code will pull Sodium labs from CDW*/
 /*Step 2 will download the saved Sodium lab pull table into SAS dataset for further cleaning*/
 
+/* Date Modified: 6/16/2018
+   Author: Shirley Wang */
+
 use /*INSERT STUDY NAME*/
 go
 

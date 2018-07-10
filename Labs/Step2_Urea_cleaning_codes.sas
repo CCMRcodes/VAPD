@@ -1,8 +1,10 @@
-/******** THIS EXAMPLE SAS CODE INCLUDES UREA LOINC CODES AND FACILITY LAB TEST NAMES TO PULLED FROM THE VA CDW. THE GOAL WAS TO 
+/******** THIS EXAMPLE SAS CODE INCLUDES UREA LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW UREA VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-libname final ''; /*insert file path/directory*/
+/* Date Modified: 6/29/2018
+   Author: Shirley Wang */
 
+libname final ''; /*insert file path/directory*/
 
 /*Note, update code to your own study name in step 3: [INSERT STUDY NAME]*/
 
@@ -10,7 +12,7 @@ libname final ''; /*insert file path/directory*/
 %let studyname= ; /*insert your own study name path in datawarehouse (CDW)*/
 %let data_source= " " ;/*insert your own data source*/
 
-/**** DOWNLOAD DFLT TABLE INTO SAS DATASET FROM VINCE ****/
+/**** DOWNLOAD DFLT TABLE INTO SAS DATASET FROM VINCI ****/
 PROC SQL ;   
 CONNECT TO OLEDB  AS CDW1 ( PROVIDER=SQLNCLI11  DATASOURCE=&data_source.
    PROPERTIES=('INITIAL CATALOG'=CDWWORK 'INTEGRATED SECURITY'=SSPI)

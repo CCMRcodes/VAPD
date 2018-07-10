@@ -1,6 +1,9 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES ABG_MECHANICAL VENTILATOR CODES AND FACILITY LAB TEST NAMES TO PULL FROM THE VA CDW. THE GOAL WAS TO 
 CREATE AN INDICATOR FOR ABG_MECHANICAL VENTILATOR FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
+/* Date Modified: 6/29/2018
+   Author: Shirley Wang */
+
 /*note: evaluating these for the concept of “evidence of a blood gas that would be used to manage a mechanically ventilated patient” 
 As such, excluding blood gases from PFTs, the OR, and outpatient settings. Including diverse and not necessarily directly 
 combinable lab tests of pH, pCO2, and pO2.*/
@@ -12,7 +15,7 @@ libname final ''; /*insert file path/directory*/
 %let studyname= ; /*insert your own study name path in datawarehouse (CDW)*/
 %let data_source= " " ;/*insert your own data source*/
 
-/**** DOWNLOAD DFLT TABLE INTO SAS DATASET FROM VINCE ****/
+/**** DOWNLOAD DFLT TABLE INTO SAS DATASET FROM VINCI ****/
 PROC SQL ;   
 CONNECT TO OLEDB  AS CDW1 ( PROVIDER=SQLNCLI11  DATASOURCE=&data_source.
    PROPERTIES=('INITIAL CATALOG'=CDWWORK 'INTEGRATED SECURITY'=SSPI)

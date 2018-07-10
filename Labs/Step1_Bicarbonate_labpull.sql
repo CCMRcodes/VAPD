@@ -1,6 +1,9 @@
 /*Below SQL code will pull Bicarbonate labs from CDW*/
 /*Step 2 will download the saved Bicarbonate lab pull table into SAS dataset for further cleaning*/
 
+/* Date Modified: 6/27/2018
+   Author: Shirley Wang */
+
 use /*INSERT STUDY NAME*/
 go
 
@@ -9,7 +12,7 @@ select LOINC, Component, Sta3n, LOINCSID
 into #loinc
 from [CDWWork].[Dim].[loinc]
 where loinc in ('14627-4', '19229-4', '19230-2', '19231-0', '19232-8', '19233-6', '1959-6', '1960-4', '1961-2', '1962-0', 
-'1963-8', '28640-1', '28641-9', '39459-3', '39460-1', '48631-6', '54359-5', '69964-5' )
+'1963-8', '28640-1', '28641-9', '39459-3', '39460-1', '48631-6', '54359-5', '69964-5','2028-9','20565-8')
 
 /*pull in Labchemtest*/
 SELECT Labchemtestsid, LabChemTestName, LabChemPrintTestName, Sta3n
@@ -28,7 +31,8 @@ WHERE labchemtestname in ('HCO3', 'BICARBONATE', 'BICARBONATE (SBC)', 'POC-HCO3'
 'HCO3-MIXED VENOUS', 'HCO3 (PULM)', '_HCO3 (OF ABG PANEL)', 'i-HCO3', 'HCO3a (POC)', 'HCO3-ACT-POCVEN', 'HCO3 - EPOC', 'HCO3c (ISTAT)', 'Hco3', 
 'HCO3-act', 'GEM-BICARBONATE (CALC)', 'Bicarbonate', 'I-BICARBONATE', 'CO2', 'BICARBONATE (cHCO3)', 'BICARBONATE (ARTERIAL)', 'I-STAT MVBG HCO3', 
 'HCO3 std', 'HCO3-(act)', 'HCO3 (ATS)', 'POC-ISTAT ABG HCO3', 'HCO3-iSTAT', 'vHCO3', 'BICARBONATE-Tac', 'HCO3v', 'BICARBONATE (iSTAT)', 'HCO3 ISTAT', 
-'SALEM BICARBONATE (PB)', 'CALC HCO3_ANC', 'HCO3 (ISTAT)', 'HCO3C', 'HCO3ACT', 'BICARBONATE (BGL4)', 'iSTAT HCO3', 'MIXED VENOUS BG HCO3', '_POC ABG HCO3')
+'SALEM BICARBONATE (PB)', 'CALC HCO3_ANC', 'HCO3 (ISTAT)', 'HCO3C', 'HCO3ACT', 'BICARBONATE (BGL4)', 'iSTAT HCO3', 'MIXED VENOUS BG HCO3', '_POC ABG HCO3',
+'CO2','CARBON DIOXIDE','CARBON DIOXIDE,Blood')
 
 
 /*pull loincsids and labchemtestsids from CDW for 2014-2017*/

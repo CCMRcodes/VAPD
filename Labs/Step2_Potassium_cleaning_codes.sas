@@ -1,5 +1,8 @@
-/******** THIS EXAMPLE SAS CODE INCLUDES POTASSIUM LOINC CODES AND FACILITY LAB TEST NAMES TO PULL FROM THE VA CDW. THE GOAL WAS TO 
+/******** THIS EXAMPLE SAS CODE INCLUDES POTASSIUM LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW POTASSIUM VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
+
+/* Date Modified: 6/29/2018
+   Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
 /*Note, update code to your own study name in step 3: [INSERT STUDY NAME]*/
@@ -8,7 +11,7 @@ libname final ''; /*insert file path/directory*/
 %let studyname= ; /*insert your own study name path in datawarehouse (CDW)*/
 %let data_source= " " ;/*insert your own data source*/
 
-/**** DOWNLOAD DFLT TABLE INTO SAS DATASET FROM VINCE ****/
+/**** DOWNLOAD DFLT TABLE INTO SAS DATASET FROM VINCI ****/
 PROC SQL ;   
 CONNECT TO OLEDB  AS CDW1 ( PROVIDER=SQLNCLI11  DATASOURCE=&data_source.
    PROPERTIES=('INITIAL CATALOG'=CDWWORK 'INTEGRATED SECURITY'=SSPI)
@@ -35,7 +38,7 @@ RUN;
 
 /*change patienticn into numeric*/  
 DATA potassium_2014_2017_v4 (rename=patienticn2=patienticn);
-SET all_patassium_2014_2017_v2;
+SET Potassium_all_2014_2017_v2;
 patienticn2 = input(patienticn, 10.);
 drop patienticn;
 RUN;

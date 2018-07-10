@@ -1,5 +1,8 @@
-/******** THIS EXAMPLE SAS CODE INCLUDES BILIRUBIN LOINC CODES AND FACILITY LAB TEST NAMES TO PULL FROM THE VA CDW. THE GOAL WAS TO 
+/******** THIS EXAMPLE SAS CODE INCLUDES BILIRUBIN LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW BILIRUBIN VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
+
+/* Date Modified: 6/29/2018
+   Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
 /*Note, update code to your own study name in step 3: [INSERT STUDY NAME]*/
@@ -8,7 +11,7 @@ libname final ''; /*insert file path/directory*/
 %let studyname= ; /*insert your own study name path in datawarehouse (CDW)*/
 %let data_source= " " ;/*insert your own data source*/
 
-/**** DOWNLOAD DFLT TABLE INTO SAS DATASET FROM VINCE ****/
+/**** DOWNLOAD DFLT TABLE INTO SAS DATASET FROM VINCI ****/
 PROC SQL ;   
 CONNECT TO OLEDB  AS CDW1 ( PROVIDER=SQLNCLI11  DATASOURCE=&data_source.
    PROPERTIES=('INITIAL CATALOG'=CDWWORK 'INTEGRATED SECURITY'=SSPI)
@@ -42,7 +45,7 @@ RUN;
 DATA bilirubin_all_2014_2017_v2; 
 SET bilirubin_all_2014_2017;
 if Topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','BLOOD*','BLOOD.','serum','SER/PLAS','WS-PLASMA','SERUM 2','PLASMA - SM','BLOOD & SERUM','BLOOD, VENOUS',
-'PLASMA & WHOLE BLOOD','WHOLE BLOOD') OR  units in ('Unit/L','GAP','g/dl','0.1','MG/DL\','mg/d','mf/dL','md/dL') or LabChemResultNumericValue <0
+'PLASMA & WHOLE BLOOD','WHOLE BLOOD') OR units notin ('mg/dL','mg/dl','MG/DL') or LabChemResultNumericValue <0 or LabChemResultNumericValue >100
 	then delete;
 RUN;
 

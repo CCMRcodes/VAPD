@@ -1,6 +1,9 @@
 /*Below SQL code will pull WBC labs from CDW*/
 /*Step 2 will download the saved WBC lab pull table into SAS dataset for further cleaning*/
 
+/* Date Modified: 6/16/2018
+   Author: Shirley Wang */
+
 use /*INSERT STUDY NAME*/
 go
 

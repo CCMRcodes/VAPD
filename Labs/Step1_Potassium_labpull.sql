@@ -1,6 +1,9 @@
 /*Below SQL code will pull Potassium labs from CDW*/
 /*Step 2 will download the saved Potassium lab pull table into SAS dataset for further cleaning*/
 
+/* Date Modified: 6/16/2018
+   Author: Shirley Wang */
+
 use /*INSERT STUDY NAME*/
 go
 
