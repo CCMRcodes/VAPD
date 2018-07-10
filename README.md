@@ -1,9 +1,3 @@
-# VAPD---
-title: "Veterans Affairs Patient Database (VAPD) ReadMe"
-author: "Shirley Wang"
-date: "June 28, 2018"
-
----
 
 ## Veterans Affairs Patient Database (VAPD 2014-2017): Building nationwide granular data for clinical discovery 
 
