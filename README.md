@@ -6,7 +6,7 @@ To study patient physiology throughout a period of acute hospitalization, we sou
 The SAS and SQL codes posted on this Github page are to be used for the creation of the VAPD.
 
 
-### General Code Structure  
+### General Code Structure of Folder Contents
 
 
 **1. VAPD**  
