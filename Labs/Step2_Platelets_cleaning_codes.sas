@@ -44,7 +44,7 @@ RUN;
 DATA platelet_all_2014_2017_v2; 
 SET platelet_all_2014_2017;
 if topography notin ('BLOOD','WHOLE BLOOD','PLASMA','SERUM','WS-BLOOD','PLATELET RICH PLASMA','ARTERIAL BLOOD','BLOOD, VENOUS','PLASMA (QUINCY)','PLASMA+SERUM',
-'SER/PLA','SERUM/BLOOD') or units in ('%','&','"K/uL"','"x10E3/uL"','130-400','K/iL','K/uL.','K/u/') or LabChemResultNumericValue <0
+'SER/PLA','SERUM/BLOOD') or units in ('%','&','"K/uL"','"x10E3/uL"','130-400','K/iL','K/uL.','K/u/','fl','fL','FL') or LabChemResultNumericValue <0
 	then delete;
 RUN;
 
