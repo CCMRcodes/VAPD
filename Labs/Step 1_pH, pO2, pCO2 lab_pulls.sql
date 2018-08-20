@@ -1,7 +1,7 @@
 /*Below SQL code will pull pH, pO2 and pCO2 labs from CDW*/
 /*Step 2 will download the saved pH, pO2 and pCO2 lab pull tables into SAS dataset for further cleaning*/
 
-/* Date Modified: 6/28/2018
+/* Date Modified: 8/20/2018
    Author: Shirley Wang */
 
 use /*INSERT STUDY NAME*/
@@ -57,8 +57,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE loincsid=-1 and     
-      a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+     WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
 
 /*get unique PatientICN*/
@@ -120,8 +119,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE loincsid=-1 and     
-      a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+     WHERE  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
 
 /*get unique PatientICN*/
@@ -140,7 +138,7 @@ into #loinc
 from [CDWWork].[Dim].[loinc]
 where loinc in ('19212-0', '19223-7', '19878-8', '19879-6', '19880-4','19881-2', '19892-9', '19893-7', '19894-5', '19895-2', '19896-0', 
 '19897-8', '19898-6', '19899-4', '19900-0', '19901-8', '19902-6', '19903-4', '19904-2', '19905-9', '19906-7', '19907-5', '19908-3', '19909-1', 
-'2019-8', '2020-6', '2021-4', '2024-8', '2026-3', '2027-1', '32771-8', '33022-5', '34705-4', '34728-6', '40619-9', '40620-7', 
+'2019-8', '2020-6', '2021-4', '2024-8', '2026-3', '2027-1',  '32771-8', '33022-5', '34705-4', '34728-6', '40619-9', '40620-7', 
 '41647-9', '50981-0', '51781-3', '57920-1', '57922-7', '76184-1', '77143-6', '11557-6', '48391-7', '49694-3', '49695-0', '16551-4', '74684-2')
 
 /*pull in Labchemtest*/
@@ -183,8 +181,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE loincsid=-1 and     
-      a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+     WHERE  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
 
 /*get unique PatientICN*/

@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES UREA LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW UREA VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 6/29/2018
+/* Date Modified: 8/20/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -60,7 +60,7 @@ RUN;
 /*keep only those with result value >0, blood topography and acceptable clean_unit*/
 DATA  Urea_2014_2017_v6; 
 SET   Urea_2014_2017_v4;
-if LabChemResultNumericValue <0  or Topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','VENOUS BLOOD','BLOOD*','BLOOD, VENOUS','ARTERIAL BLD','BLOOD VENOUS',
+if LabChemResultNumericValue <0  or Topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','VENOUS BLOOD','BLOOD*','BLOOD, VENOUS','ARTERIAL BLD','BLOOD VENOUS', 'BLOOD.',
 'VENOUS BLD','BLOOD, ARTERIAL','WS-PLASMA','BLOOD & SERUM','SERUM & BLOOD','ARTERIAL BLOOD','VENOUS BLOOD')
    or  clean_unit notin ('MG/DL') then delete;
 RUN;

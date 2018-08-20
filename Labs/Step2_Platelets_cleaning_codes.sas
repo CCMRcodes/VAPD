@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES PLATELET LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW PLATELET VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 6/29/2018
+/* Date Modified: 8/20/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -36,15 +36,24 @@ format LabSpecimenDate mmddyy10.;
 keep Sta3n LabChemTestSID PatientSID LabChemResultNumericValue TopographySID LOINCSID Units RefHigh RefLow Topography LabSpecimenDate patienticn;
 run;
 
+
+data platelet_all_2014_2017;
+set platelet_all_2014_2017;
+Units2=upcase(units); /*turn all units into uppercase*/
+units3=compress(Units2,'.'); /*removes '.' in units*/
+clean_unit = compress(units3); /*removes all blanks (by default - specify options to remove other chars)*/
+drop units2 units3 units ;
+run;
+
 PROC FREQ DATA=platelet_all_2014_2017  order=freq;
-TABLE topography  units;
+TABLE topography  clean_unit;
 RUN;
 
 /*keep only those with result value >0, blood topography and acceptable unit*/
-DATA platelet_all_2014_2017_v2; 
+DATA platelet_all_2014_2017_v2; /*25804823*/
 SET platelet_all_2014_2017;
 if topography notin ('BLOOD','WHOLE BLOOD','PLASMA','SERUM','WS-BLOOD','PLATELET RICH PLASMA','ARTERIAL BLOOD','BLOOD, VENOUS','PLASMA (QUINCY)','PLASMA+SERUM',
-'SER/PLA','SERUM/BLOOD') or units in ('%','&','"K/uL"','"x10E3/uL"','130-400','K/iL','K/uL.','K/u/','fl','fL','FL') or LabChemResultNumericValue <0
+'SER/PLA','SERUM/BLOOD') or clean_unit in ('%','&','"K/uL"','"x10E3/uL"','130-400','K/iL','K/uL.','K/u/','CONC','FL','#','&','CUMM','ADEQ') or LabChemResultNumericValue <0
 	then delete;
 RUN;
 

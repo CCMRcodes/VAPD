@@ -36,15 +36,23 @@ format LabSpecimenDate mmddyy10.;
 keep Sta3n LabChemTestSID PatientSID LabChemResultNumericValue TopographySID LOINCSID Units RefHigh RefLow Topography LabSpecimenDate patienticn;
 run;
 
+data lactate_all_2014_2017;
+set lactate_all_2014_2017;
+Units2=upcase(units); /*turn all units into uppercase*/
+units3=compress(Units2,'.'); /*removes '.' in units*/
+clean_unit = compress(units3); /*removes all blanks (by default - specify options to remove other chars)*/
+drop units2 units3 units ;
+run;
+
 PROC FREQ DATA=lactate_all_2014_2017  order=freq;
-TABLE topography  units;
+TABLE topography  clean_unit;
 RUN;
 
 /*keep only those with result value >0, blood topography and acceptable unit*/
 DATA lactate_all_2014_2017; 
 SET  lactate_all_2014_2017;
 if topography notin ('ART BLOOD','BLOOD UNSPECIFIED','BLOOD, ARTERIAL','ARTERIAL BLD','BLOOD VENOUS','WHOLE BLOOD','PLASMA','ARTERIAL BLOOD',
-'BLOOD','VENOUS BLOOD','SERUM','BLOOD, VENOUS','VENOUS BLD') or units in ('%','MG/DL','mml/L','2.1','6','MMOL/l') or LabChemResultNumericValue <0
+'BLOOD','VENOUS BLOOD','SERUM','BLOOD, VENOUS','VENOUS BLD') or clean_unit notin ('MMOL/L', 'MEQ/L','MMOLE/L','MMOLS/L') or LabChemResultNumericValue <0
 	then delete;
 RUN;
 

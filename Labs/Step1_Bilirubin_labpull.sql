@@ -1,7 +1,7 @@
 /*Below SQL code will pull Bilirubin labs from CDW*/
 /*Step 2 will download the saved Bilirubin lab pull table into SAS dataset for further cleaning*/
 
-/* Date Modified: 6/16/2018
+/* Date Modified: 8/20/2018
    Author: Shirley Wang */
 
 use /*INSERT STUDY NAME*/
@@ -48,7 +48,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE loincsid=-1 and     
+     WHERE /*loincsid=-1 and   */  
       a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
 
