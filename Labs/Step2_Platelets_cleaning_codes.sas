@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES PLATELET LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW PLATELET VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 8/20/2018
+/* Date Modified: 8/21/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -53,7 +53,8 @@ RUN;
 DATA platelet_all_2014_2017_v2; /*25804823*/
 SET platelet_all_2014_2017;
 if topography notin ('BLOOD','WHOLE BLOOD','PLASMA','SERUM','WS-BLOOD','PLATELET RICH PLASMA','ARTERIAL BLOOD','BLOOD, VENOUS','PLASMA (QUINCY)','PLASMA+SERUM',
-'SER/PLA','SERUM/BLOOD') or clean_unit in ('%','&','"K/uL"','"x10E3/uL"','130-400','K/iL','K/uL.','K/u/','CONC','FL','#','&','CUMM','ADEQ') or LabChemResultNumericValue <0
+'SER/PLA','SERUM/BLOOD') or clean_unit in ('%','"K/UL"','10*6/UL','U/L','130-400','K/UL','CONC','FL','#','&','CUMM','ADEQ',
+'10E9/L','BILL/L','X10(9)/L', '10*9/L','10(9)/L', 'K/IL','K/U/', 'X10E9/L','X10E6/UL', 'K/CUMM,') or LabChemResultNumericValue <0
 	then delete;
 RUN;
 
