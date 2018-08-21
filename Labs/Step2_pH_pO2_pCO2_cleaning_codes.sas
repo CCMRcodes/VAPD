@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES pH, pO2 and pCO2 LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1. THE GOAL WAS TO 
 CREATE A HIGH AND LOW pH, pO2 and pCO2 VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 6/29/2018
+/* Date Modified: 8/21/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -240,7 +240,7 @@ PROC SQL;
 CREATE TABLE  PCO2_labs_all_2014_2017_V3 (compress=yes) AS 
 SELECT *
 FROM PCO2_labs_all_2014_2017_V2
-WHERE   clean_unit in ('MMOL/L','MMOL/DL','MEQ/L','MMHG','MM/HG','MM/L','TORR','')  /*also include those with missing units*/
+WHERE   clean_unit in ('MMHG','MM/HG','TORR','')  /*also include those with missing units*/
 and  0<LabChemResultNumericValue <1000 and 
 topography in ('PLASMA','SERUM','ARTERIAL BLOOD','BLOOD','SER/PLA','VENOUS BLOOD','ARTERIAL BLD',
 'BLOOD*','BLOOD, VENOUS','BLOOD VENOUS','BLOOD, ARTERIAL','VENOUS BLD','BLOOD.','ART BLOOD','serum','BLOOD (VENOUS)','SER/PLAS',
