@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES BILIRUBIN LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW BILIRUBIN VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 6/29/2018
+/* Date Modified: 8/21/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -33,19 +33,19 @@ data bilirubin_all_2014_2017;
 set bilirubin_all_2014_2017;
 LabSpecimenDate=datepart(LabChemSpecimenDateTime);
 format LabSpecimenDate mmddyy10.;
-keep Sta3n LabChemTestSID PatientSID LabChemResultNumericValue TopographySID LOINCSID Units RefHigh RefLow Topography LabSpecimenDate patienticn;
+clean_unit=upcase(units)/*turn units into all upper cases*/
+keep Sta3n LabChemTestSID PatientSID LabChemResultNumericValue TopographySID LOINCSID Units RefHigh RefLow Topography LabSpecimenDate patienticn clean_unit;
 run;
 
-/*no need to create new variable "clean_units", not that messy*/
 PROC FREQ DATA=bilirubin_all_2014_2017  order=freq;
-TABLE topography  units;
+TABLE topography  clean_unit;
 RUN;
 
 /*keep only those with result value >0, blood topography and acceptable units*/
 DATA bilirubin_all_2014_2017_v2; 
 SET bilirubin_all_2014_2017;
 if Topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','BLOOD*','BLOOD.','serum','SER/PLAS','WS-PLASMA','SERUM 2','PLASMA - SM','BLOOD & SERUM','BLOOD, VENOUS',
-'PLASMA & WHOLE BLOOD','WHOLE BLOOD') OR units notin ('mg/dL','mg/dl','MG/DL') or LabChemResultNumericValue <0 or LabChemResultNumericValue >100
+'PLASMA & WHOLE BLOOD','WHOLE BLOOD') OR clean_unit notin ('MG/DL') or LabChemResultNumericValue <0 or LabChemResultNumericValue >100
 	then delete;
 RUN;
 
