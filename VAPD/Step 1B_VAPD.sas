@@ -612,7 +612,7 @@ data icu.allacute&year.;
 set icu.allacute&year.;
 	if not missing(deathdaysafterdischarge) and abs(deathdaysafterdischarge)<=1 then inhospmort=1;
 	else inhospmort=0;
-	if not missing(deathdaysafterdischarge) and inhospmort=0 and abs(deathdaysafterdischarge)<=30 then mort30=1;
+	if not missing(deathdaysafterdischarge) and abs(deathdaysafterdischarge)<=30 then mort30=1;
 	else mort30=0; /*indicate 30-day mortality on only the live discharges*/
 run;
 
