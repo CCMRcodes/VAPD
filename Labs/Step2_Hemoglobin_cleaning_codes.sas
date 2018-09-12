@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES HEMOGLOBIN LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW HEMOGLOBIN VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 8/20/2018
+/* Date Modified: 9/12/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -56,11 +56,12 @@ TABLE topography clean_unit;
 RUN;
 
 /*keep only those with blood topography and acceptable clean_unit*/
-DATA Hemoglobin_2014_2017_v5;
+DATA Hemoglobin_2014_2017_v5; 
 SET Hemoglobin_2014_2017_v4;
-if Topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','VENOUS BLOOD','BLOOD*','BLOOD, VENOUS','ARTERIAL BLD','BLOOD VENOUS',
-'VENOUS BLD','BLOOD, ARTERIAL','WS-PLASMA','BLOOD & SERUM','SERUM & BLOOD','ARTERIAL BLOOD','VENOUS BLOOD','WHOLE BLOOD') 
-or  clean_unit notin ('G/DL','GM/DL') or LabChemResultNumericValue <0
+if Topography notin ('BLOOD','ARTERIAL BLOOD','WHOLE BLOOD','VENOUS BLOOD',
+'BLOOD, VENOUS','ARTERIAL BLD','BLOOD VENOUS','VENOUS BLD','BLOOD, ARTERIAL','PLASMA','SERUM',
+'BLOOD (VENOUS)') 
+or  clean_unit notin ('G/DL','GM/DL','G/100ML','GM','G%','GMS','GM%','') or LabChemResultNumericValue <0
     then delete;
 RUN;
 
@@ -69,11 +70,41 @@ PROC MEANS DATA=Hemoglobin_2014_2017_v5 MIN MAX MEAN MEDIAN Q1 Q3;
 VAR LabChemResultNumericValue; 
 RUN;
 
+data check_units; 
+set Hemoglobin_2014_2017_v5;
+if clean_unit in ('GM','G%','GMS','GM%');
+run;
+
+PROC MEANS DATA=check_units MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue; 
+RUN;
+/*looks similar to G/DL units. Conclusion: no unit conversions needed*/
+
+/*Check labs with missing units only*/
+data missing_unit; 
+set Hemoglobin_2014_2017_v5;
+if clean_unit='';
+run;
+
+PROC MEANS DATA=missing_unit MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue; 
+RUN;
+
+/*only keep permissible range:1-25 G/DL*/
+data Hemoglobin_2014_2017_v6; 
+set Hemoglobin_2014_2017_v5;
+if LabChemResultNumericValue<1 or LabChemResultNumericValue>25 then delete;
+run;
+
+PROC MEANS DATA=Hemoglobin_2014_2017_v6 MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue; 
+RUN;
+
 /*create HI & LO values by patient and date*/
 PROC SQL;
 CREATE TABLE all_Hemoglobin_hi_lo_2014_2017 (compress=yes)  AS
 SELECT *, max(LabChemResultNumericValue) as hi_Hemoglobin_daily, min(LabChemResultNumericValue) as lo_Hemoglobin_daily
-FROM Hemoglobin_2014_2017_v5
+FROM Hemoglobin_2014_2017_v6
 GROUP BY patienticn, LabSpecimenDate
 ORDER BY patienticn, LabSpecimenDate;
 QUIT;

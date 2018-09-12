@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES CREATININE LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW CREATININE VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 6/29/2018
+/* Date Modified: 9/12/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -36,31 +36,62 @@ format LabSpecimenDate mmddyy10.;
 keep Sta3n LabChemTestSID PatientSID LabChemResultNumericValue TopographySID LOINCSID Units RefHigh RefLow Topography LabSpecimenDate  patienticn;
 run;
 
+/*create clean unit*/
+data creatinine_all_2014_2017;
+set creatinine_all_2014_2017;
+Units2=upcase(units); /*turn all units into uppercase*/
+units3=compress(Units2,'.'); /*removes '.' in units*/
+clean_unit = compress(units3); /*removes all blanks (by default - specify options to remove other chars)*/
+drop  units2 units3 units;
+run;
+
+/*change patienticn into numeric*/
+DATA  creatinine_all_2014_2017 (rename=patienticn2=patienticn);
+SET  creatinine_all_2014_2017;
+patienticn2 = input(patienticn, 10.);
+year=year(LabSpecimenDate);
+drop patienticn;
+RUN;
+
 PROC FREQ DATA=creatinine_all_2014_2017  order=freq;
-TABLE topography  units;
+TABLE topography  clean_unit;
 RUN;
 
 /*look at frequency and delete labs that are non-blood topography and with incorrect units*/
 DATA creatinine_all_2014_2017_V2; 
 SET  creatinine_all_2014_2017;
-if topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','BLOOD*','VENOUS BLOOD','ARTERIAL BLOOD','BLOOD, VENOUS','BLOOD.','VENOUS BLD','BLOOD VENOUS',
-'serum','BLOOD (UNSPUN)','SER/PLAS','PLAS','WS-PLASMA','ARTERIAL BLD','PLASMA & WHOLE BLOOD','PLASMA - SM','BLOOD & SERUM','SERUM & BLOOD','SERUM & PLASMA',
-'WHOLE BLOOD') OR  units notin ('mg/dL','mg/dl','MG/DL','mg/dL.','mmol/L','umol/L','mg/dL','mg/DL','mg\dL') or LabChemResultNumericValue <0
+if topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','BLOOD*','VENOUS BLOOD','ARTERIAL BLOOD','BLOOD, VENOUS',
+'BLOOD.','VENOUS BLD','BLOOD VENOUS','serum','SER/PLAS','PLAS','WS-PLASMA','WHOLE BLOOD') 
+OR  units notin ('MG/DL','MG?DL','MGDL','MG\DL','') 
+or LabChemResultNumericValue <0 
 	then delete;
 RUN;
 
-/*change patienticn into numeric*/
-DATA creatinine_all_2014_2017_V4  (rename=patienticn2=patienticn);
-SET creatinine_all_2014_2017_V2;
-patienticn2 = input(patienticn, 10.);
-drop patienticn;
+/*check missing units*/
+data missing_units; 
+set creatinine_all_2014_2017_V2;
+if clean_unit = '';
+run;
+
+PROC MEANS DATA= missing_units  MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue ; /*mean: 7.4272795, makes sense, will keep them*/
+RUN;
+
+/*permissible range 0.1-28.3 mg/dL*/
+data creatinine_all_2014_2017_V3; 
+set creatinine_all_2014_2017_V2;
+if LabChemResultNumericValue <0.1 or LabChemResultNumericValue>28.3 then delete;
+run;
+
+PROC MEANS DATA= creatinine_all_2014_2017_V3  MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue ; 
 RUN;
 
 /*create HIGH & LOW values by patient and date*/
 PROC SQL;
 CREATE TABLE all_creat_hi_lo_2014_2017   AS  
 SELECT *, max(LabChemResultNumericValue) as hi_creat_daily, min(LabChemResultNumericValue) as lo_creat_daily
-FROM creatinine_all_2014_2017_V4
+FROM creatinine_all_2014_2017_V3
 GROUP BY patienticn, LabSpecimenDate
 ORDER BY patienticn, LabSpecimenDate;
 QUIT;

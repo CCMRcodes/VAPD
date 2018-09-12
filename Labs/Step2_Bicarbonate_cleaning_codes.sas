@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES BICARBONATE LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1. THE GOAL WAS TO 
 CREATE A HIGH AND LOW BICARBONATE VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 6/29/2018
+/* Date Modified: 9/12/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -57,14 +57,30 @@ PROC FREQ DATA=bicarb_all_2014_2017_v4 order=freq;
 TABLE topography clean_unit;
 RUN;
 
-/*keep only those with blood topography and acceptable clean_unit*/
+/*keep only those with blood topography, acceptable clean_unit */
 DATA  bicarb_all_2014_2017_v6; 
 SET  bicarb_all_2014_2017_v4;
-if LabChemResultNumericValue <0  or LabChemResultNumericValue >200  or  /*delete the outliers*/
-Topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','VENOUS BLOOD','BLOOD*','BLOOD, VENOUS','ARTERIAL BLD','BLOOD VENOUS',
-'VENOUS BLD','BLOOD, ARTERIAL','WS-PLASMA','BLOOD & SERUM','SERUM & BLOOD','ARTERIAL BLOOD','VENOUS BLOOD')
-  OR  clean_unit notin ('MEQ/L','MMOL/L') then delete;
+if LabChemResultNumericValue <0  or Topography notin ('PLASMA','SERUM','BLOOD','ARTERIAL BLOOD','SER/PLA','VENOUS BLOOD','BLOOD*',
+'ARTERIAL BLD','BLOOD, VENOUS','BLOOD, ARTERIAL','BLOOD.','BLOOD VENOUS','serum','ART BLOOD',
+'VENOUS BLD','BLOOD (VENOUS)','SER/PLAS','BLOOD UNSPECIFIED','BLOOD, MIXED VENOUS','WHOLE BLOOD',
+'MIXED VEN/ART BLD','BLOOD,ARTERIAL','ABLD','CENTRAL LINE','BLOOD, PULMONARY ARTERY','WS-PLASMA')
+OR  clean_unit notin ('MMOL/L','MEQ/L','MM/L','MMOLE/L','MMOI/L','') then delete; /*mmol/l=meq/l, no unit conversion needed*/
 RUN;
+
+/*Check labs with missing units only*/
+data missing_unit; 
+set bicarb_all_2014_2017_v6;
+if clean_unit = '';
+run;
+PROC MEANS DATA=missing_unit MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue; 
+RUN;   /*if they look okay then keep*/
+
+/*Keep only those in permissible range 1-60 mmol/L, N= */
+data bicarb_all_2014_2017_v6; 
+set bicarb_all_2014_2017_v6;
+if LabChemResultNumericValue <1  or LabChemResultNumericValue >60 then delete; 
+run;
 
 /*check lab value IQR to make sure they're in the acceptable ranges*/
 PROC MEANS DATA=bicarb_all_2014_2017_v6 MIN MAX MEAN MEDIAN Q1 Q3;

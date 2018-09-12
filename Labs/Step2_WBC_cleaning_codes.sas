@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES WHITE BLOOD CELL LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW WHITE BLOOD CELL VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 6/29/2018
+/* Date Modified: 9/12/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -28,81 +28,136 @@ PROC SORT DATA=wbc_2014_2017 nodupkey;
 BY  patientSID  sta3n LabChemTestSID  LOINCSID Units LabChemResultNumericValue LabChemSpecimenDateTime;
 RUN;
 
-
-/*keep only those with result value >0, blood topography and acceptable clean_unit*/
-data wbc_2014_2017_V2 (compress=yes); 
-set wbc_2014_2017; 
+/*create new date values*/
+data wbc_2014_2017;
+set wbc_2014_2017;
 LabSpecimenDate=datepart(LabChemSpecimenDateTime);
+year=year(LabSpecimenDate);
 format LabSpecimenDate mmddyy10.;
-if topography notin ('BLOOD', 'WHOLE BLOOD', 'BLOOD,CAPILLARY', 'PLASMA','WS-BLOOD','SERUM') or  LabChemResultNumericValue <0 
-   then delete;
-keep Sta3n LabChemTestSID PatientSID LabChemResultNumericValue TopographySID LOINCSID Units RefHigh RefLow topography LabSpecimenDate patienticn;
+keep Sta3n year LabChemTestSID PatientSID LabChemResultNumericValue TopographySID LOINCSID Units RefHigh RefLow Topography LabSpecimenDate patienticn;
 run;
 
-/*convert units*/
-DATA wbc_2014_2017_V3 (compress=yes);
-SET wbc_2014_2017_V2; 
+/*creat clean unit*/
+data wbc_2014_2017;
+set wbc_2014_2017;
 Units2=upcase(units); /*turn all units into uppercase*/
 units3=compress(Units2,'.'); /*removes '.' in units*/
-units4 = compress(units3); /*removes all blanks (by default - specify options to remove other chars)*/
-if units4 ='PERCENT' or units4 ='"%"' or units4 ="%'" or units4 ='%30' 
-	then units4='%';
-if units4 ='THOU' or units4='K' or units4='X10-3' or units4='X(10)3' or units4='X1000' or units4='X10E3' 
-	then units4='THOUSAND';
-if units4 ='10*3/UL' or units4='X10-3/UL' or units4='X1000/UL' or units4='x1000/uL' or units4='10E3/UL' or units4='10e3/uL' or units4='X103/UL'
-or units4='1000/UL' or units4='X10E3/UL' or units4 ='THOU/UL' or units4="10'3/UL" or units4='10X3/UL' or units4='K/UL' or units4='103/UL' 
-or units4='TH/UL' or units4='X10(3)/UL' or units4='10.e3/uL' or units4='K/ul' or units4='10*3/uL' or units4='K/uL' or units4='10E9/L'
-or units4='x10-3/uL' or units4='X10-3/ul' or units4='10e3/uL' or units4='thou/uL' or units4='1000/uL' or units4='x1000/ul' or units4='Thous./ul'
-or units4='10 3/uL' or units4='X10 3/UL' or units4='10 3/ uL' or units4='K/UL'
-	then units4='THOUS/UL';
-if units4 ='10X3CUMM' or units4='T/CUMM' or units4='K/CUMM' or units4='K/cumm' or units4='10x3cumm' then units4='THOU/CUMM';
-if units4 ='X103' then units4='X(10)3';
-if units4 ='THOUCMM' or units4='K/CMM' or units4='10X3/CMM' or units4='K/CCM' or units4='K/cmm' or units4='t/cmm' or units4='Thous./cmm' 
-	or units4='k/cmm' or units4='K/Cmm' or units4='THOUS/CMM'
-	then units4='THOUS/CMM';
-if units4 ='X1000/MM3' or units4='THOUS/MM3' or units4='TH/MM3' or units4='K/MM-3' or units4='K/mm3'  or units4='K/MM3' or units4='K/mm-3'
-	then units4='1000/MM3';
-if units4='10E3/MCL'  then units4='10(3)/MCL';
-if units4='10*9/L' then units4='X10(9)/L';
-if units4='/CUMM' or units4='/CUM' then units4='CUMM';
-drop units2 units3 units;
-RUN;
-
-PROC FREQ DATA= wbc_2014_2017_V3   order=freq;
-TABLE units4;
-RUN;
-
-DATA wbc_2014_2017_V4 (rename=units4=clean_unit compress=yes) ;
-SET  wbc_2014_2017_V3;
-if units4 notin ('THOUS/UL','THOUS/CMM','1000/MM3','K/MCL','/UL','THOUSAND','THOU/CUMM','X10(9)/L','10(3)/MCL', 'T/CMM','1000/MCL')
-  then delete; 
+clean_unit = compress(units3); /*removes all blanks (by default - specify options to remove other chars)*/
+drop  units2 units3 units;
 run;
 
-PROC FREQ DATA= wbc_2014_2017_V4 order=freq;
-TABLE  clean_unit topography;
+PROC FREQ DATA=wbc_2014_2017  order=freq;
+TABLE topography  clean_unit;
 RUN;
 
-PROC MEANS DATA=wbc_2014_2017_V4   MIN MAX MEAN MEDIAN Q1 Q3;
+data wbc_2014_2017_V2 (compress=yes); 
+set wbc_2014_2017; 
+if topography notin ('BLOOD','WHOLE BLOOD','PLASMA','SERUM','WS-BLOOD','BLOOD - SM','BLOOD*',
+'BLOOD, VENOUS','PLASMA+SERUM','SER/PLA') 
+or clean_unit notin ('K/CMM','K/UL','K/MM3','10*3/UL','10E3/UL','X10-3/UL','X1000/UL','10E9/L',
+'K/MCL','BILL/L','10X3CUMM','THOUS/CMM','10(3)/MCL','/UL','THOU/CUMM','10E3/MCL','1000/UL','THOU/UL',
+'T/CMM','K/MM-3','K/CUMM','X103','K/CCM','103/UL','10X3/CMM','#/CMM','K/ML','X10E3/UL','#/UL','CUMM',
+'10X3/CCM','X1000','/CUMM','/CUM',"10'3/UL",'UL','THOUCMM','/CMM','10X3/UL','CMM','THOU','TH/MM3',
+'CELLS/UL','1000/MCL','TH/UL','THOUS/UL','X10(9)/L','WBC/CMM','X10(3)/UL','THO/MM3','THOUS/MM3','X10E9/L',
+'/MM3','1000/MM3','') or LabChemResultNumericValue <0 
+   then delete;
+run;
+
+/*look at descriptive for missing unit*/
+data misisng_unit_blood; 
+set wbc_2014_2017_V2;
+if clean_unit='';
+run;
+
+PROC MEANS DATA=misisng_unit_blood  MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue ;/*median=5900*/ /*need to divide by 1000*/
+RUN;
+
+/*permissible range 0-300 X 10^9/L*/
+
+/*conversions: 1 MCL=10^6 L, so it's 1000/MCL, so 0-300 thou/mcl is the range*/
+/*mm3=10^6L=uL */
+
+/*look at descriptive for /UL*/
+data UL; 
+set wbc_2014_2017_V2;
+if clean_unit in ('UL');
+run;
+
+PROC MEANS DATA=UL   MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue ;/*median=5900*/ /*need to divide by 1000*/
+RUN;
+
+data UL2;
+set wbc_2014_2017_V2;
+if clean_unit in ('CELLS/UL');
+run;
+
+PROC MEANS DATA=UL2   MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue ;/*median=6700*//*need to divide by 1000*/
+RUN;
+
+
+/*look at descriptives for /L*/
+data L; 
+set wbc_2014_2017_V2;
+if clean_unit in ('10E9/L','BILL/L','X10(9)/L','X10E9/L');
+run;
+
+PROC MEANS DATA=L   MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue ;/*median=7.4*/
+RUN;
+
+
+/*look at descriptives for thousand/ uL, MM3, MCL*/
+data thousands; 
+set wbc_2014_2017_V2;
+if clean_unit in ('K/CMM','K/UL','K/MM3','10*3/UL','10E3/UL','X10-3/UL','X1000/UL',
+'K/MCL','10X3CUMM','THOUS/CMM','10(3)/MCL','THOU/CUMM','10E3/MCL','1000/UL','THOU/UL',
+'T/CMM','K/MM-3','K/CUMM','X103','K/CCM','103/UL','10X3/CMM','K/ML','X10E3/UL',
+'10X3/CCM','X1000',"10'3/UL",'THOUCMM','10X3/UL','THOU','TH/MM3','1000/MCL',
+'TH/UL','THOUS/UL','X10(3)/UL','THO/MM3','THOUS/MM3','1000/MM3');
+run;
+
+PROC MEANS DATA=thousands   MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue ; /*median=7.4*/
+RUN;
+
+
+/*look at descriptives for CUMM, CCM, CUM, CMM, etc.*/
+data cumm; 
+set wbc_2014_2017_V2;
+if clean_unit in ('#/CMM','CUMM','/CUMM','/CUM','/CMM','CMM','WBC/CMM','/MM3');
+run;
+
+PROC MEANS DATA=cumm   MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue ; /*mean=7377, median=5700*/ /*need to divide by 1000*/
+RUN;
+
+/*convert units*/
+data wbc_2014_2017_V3 (rename=new_clean_unit=clean_unit rename=new_lab_value=LabChemResultNumericValue); /*25803475*/
+set wbc_2014_2017_V2;
+if clean_unit in ('#/CMM','CUMM','/CUMM','/CUM','/CMM','CMM','WBC/CMM','/MM3','UL','CELLS/UL') 
+	then new_lab_value=LabChemResultNumericValue/1000;
+else new_lab_value=LabChemResultNumericValue;
+length new_clean_unit $4;
+if clean_unit='' then new_clean_unit=''; else new_clean_unit='K/uL';
+if new_lab_value <0 or new_lab_value>300 then delete;
+drop clean_unit LabChemResultNumericValue;
+run;
+
+PROC MEANS DATA=wbc_2014_2017_V3   MIN MAX MEAN MEDIAN Q1 Q3;
 VAR LabChemResultNumericValue ;
 RUN;
 
 /*change patienticn into numeric*/   
 DATA wbc_2014_2017_V6b (rename=patienticn2=patienticn);
-SET wbc_2014_2017_V4;
+SET wbc_2014_2017_V3;
+year=year(LabSpecimenDate);
 patienticn2 = input(patienticn, 10.);
 drop patienticn;
 RUN;
 
-PROC FREQ DATA=wbc_2014_2017_V6b  order=freq;
-TABLE  LabChemTestName clean_unit;
-RUN;
-
-/******************************************************************/
-
-/*look at histogram of LabChemResultNumericValue*/;
-proc sgplot data=wbc_2014_2017_V6b noautolegend;
- histogram LabChemResultNumericValue/ binwidth = 100;
-run;
 
 /*create HIGH & LOW values by patient and date*/
 PROC SQL;

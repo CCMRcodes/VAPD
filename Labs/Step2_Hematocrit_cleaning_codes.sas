@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES HEMATOCRIT LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW HEMATOCRIT VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 8/20/2018
+/* Date Modified: 9/12/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -58,16 +58,37 @@ TABLE topography clean_unit;
 RUN;
 
 /*keep only those with blood topography and acceptable clean_unit*/
-DATA Hematocrit_2014_2017_v5;
+DATA Hematocrit_2014_2017_v5; 
 SET Hematocrit_2014_2017_v4 ;
-if Topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','VENOUS BLOOD','BLOOD*','BLOOD, VENOUS','ARTERIAL BLD','BLOOD VENOUS',
-'VENOUS BLD','BLOOD, ARTERIAL','WS-PLASMA','BLOOD & SERUM','SERUM & BLOOD','ARTERIAL BLOOD','VENOUS BLOOD', 'WHOLE BLOOD') 
-or  clean_unit notin ('%','%PCV','VOL%','%VOLUME','"%"','PERCENT') or LabChemResultNumericValue <0
+if Topography notin ('BLOOD','ARTERIAL BLOOD','WHOLE BLOOD','VENOUS BLOOD','BLOOD, VENOUS','ARTERIAL BLD','VENOUS BLD',
+'BLOOD VENOUS','BLOOD, ARTERIAL','BLOOD (VENOUS)','PLASMA','SERUM','WS-BLOOD') 
+or  clean_unit notin ('%','%PCV','VOL%','%VOLUME','"%"','PERCENT','PCV%','PCV','') or LabChemResultNumericValue <0
    then delete;
 RUN;
 
-/*double-check lab value ranges*/
+/*Check labs with missing units only*/
+data missing_unit; 
+set Hematocrit_2014_2017_v5;
+if clean_unit  ='';
+run;
+
+PROC MEANS DATA=missing_unit MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue; 
+RUN;
+
+/*double-check ALL lab value ranges*/
 PROC MEANS DATA=Hematocrit_2014_2017_v5 MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue; 
+RUN;
+
+/*Conclusion: all in % unit so no conversions needed*/
+/*Only keep permissible range: 5-75%*/
+data Hematocrit_2014_2017_v6; 
+set Hematocrit_2014_2017_v5;
+if LabChemResultNumericValue <5 or LabChemResultNumericValue>75 then delete;
+run;
+
+PROC MEANS DATA=Hematocrit_2014_2017_v6 MIN MAX MEAN MEDIAN Q1 Q3;
 VAR LabChemResultNumericValue; 
 RUN;
 
@@ -75,7 +96,7 @@ RUN;
 PROC SQL;
 CREATE TABLE all_Hematocrit_hi_lo_2014_2017 (compress=yes)  AS   
 SELECT *, max(LabChemResultNumericValue) as hi_Hematocrit_daily, min(LabChemResultNumericValue) as lo_Hematocrit_daily
-FROM Hematocrit_2014_2017_v5
+FROM Hematocrit_2014_2017_v6
 GROUP BY patienticn, LabSpecimenDate
 ORDER BY patienticn, LabSpecimenDate;
 QUIT;

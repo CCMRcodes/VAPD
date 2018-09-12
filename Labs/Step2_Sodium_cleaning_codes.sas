@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES SODIUM LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW SODIUM VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 6/29/2018
+/* Date Modified: 9/12/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -57,12 +57,27 @@ TABLE topography clean_unit;
 RUN;
 
 /*keep only those with blood topography and acceptable clean_unit*/
+/*permissible range: 100-215 mmol/l*/ /*1 meq/l=1mmol/l, no conversions needed*/
 DATA sodium_2014_2017_v5; 
 SET  sodium_2014_2017_v4;
-if LabChemResultNumericValue <0  or Topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','VENOUS BLOOD','BLOOD*','BLOOD, VENOUS','ARTERIAL BLD','BLOOD VENOUS',
-'VENOUS BLD','BLOOD, ARTERIAL','WS-PLASMA','BLOOD & SERUM','SERUM & BLOOD','ARTERIAL BLOOD','VENOUS BLOOD')
-   or  clean_unit notin ('MEQ/L','MMOL/L') then delete;
+if LabChemResultNumericValue <0  or Topography notin ('PLASMA','SERUM','BLOOD','ARTERIAL BLOOD',
+'SER/PLA','BLOOD*','VENOUS BLOOD','BLOOD, VENOUS','ARTERIAL BLD','BLOOD VENOUS','BLOOD.','VENOUS BLD','serum','BLOOD, ARTERIAL')
+   or  clean_unit notin ('MEQ/L','MMOL/L','MM/L','MOL/L','MMMOL/L','MMOLL/L','') then delete;
 RUN;
+
+/*Check labs with missing units only*/
+data missing_unit; 
+set sodium_2014_2017_v5;
+if clean_unit='';
+run;
+PROC MEANS DATA=missing_unit MIN MAX MEAN MEDIAN Q1 Q3;
+VAR LabChemResultNumericValue; 
+RUN;
+
+data sodium_2014_2017_v5; 
+set sodium_2014_2017_v5;
+if LabChemResultNumericValue <100 or LabChemResultNumericValue >215 then delete;
+run;
 
 /*check lab value ranges*/
 PROC MEANS DATA=sodium_2014_2017_v5 MIN MAX MEAN MEDIAN Q1 Q3;
