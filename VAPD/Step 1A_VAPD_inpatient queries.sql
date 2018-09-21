@@ -1,7 +1,7 @@
 /*Step 1 of building a VA inpatient database*/
 /*Below SQL code pulls VA acute inpatient records including diagnosis codes from specialty stays.*/
 
-/* Date Modified: June 2018
+/* Date Modified: 9/21/2018
    Author: Brenda Vincent */
 
 use /*INSERT STUDY NAME*/
