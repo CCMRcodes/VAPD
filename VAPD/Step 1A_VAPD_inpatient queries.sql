@@ -27,7 +27,7 @@ case when specialty in ('ANESTHESIOLOGY',
 					'ZZPULMONARY DISEASE','MEDICAL OBSERVATION','SURGICAL OBSERVATION','ED OBSERVATION','NEUROLOGY OBSERVATION') 
 					     then 1 else 0 end as acute
 into dflt.acutespecialty
-from cdwwork.dim.treatingspecialty--14647
+from cdwwork.dim.treatingspecialty
 
 /*Inpat.SpecialtyTransfer Records*/
 declare @STARTDATE2 datetime2 ='20140101', @ENDDATE2 datetime2 ='20180201'
