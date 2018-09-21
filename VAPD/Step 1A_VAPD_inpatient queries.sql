@@ -188,7 +188,7 @@ into #vapd_inpat
 from dflt.merged_vapd_inpat
 where dischargedatetime is not null
 
-drop table dflt.merged_vapd_inpat,  dflt.merged_vapd_inpat2, dflt.acutespecialty, dflt.acutetreatingspecialty
+drop table dflt.merged_vapd_inpat
 
 select *
 into dflt.vapd_inpat
@@ -197,9 +197,6 @@ from #vapd_inpat--56,033,770
 select count(distinct patienticn) from dflt.vapd_inpat  
 select count(distinct inpatientsid) from dflt.vapd_inpat 
 
-select *
-from dflt.vapd_inpat
-where patientsid=13394842 and ordinalnumber=1 
-order by specialtytransferdatetime;
+
 
 /*Download dflt.vapd_inpat into a SAS dataset for further data management*/
