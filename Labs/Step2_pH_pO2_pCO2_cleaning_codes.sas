@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES pH, pO2 and pCO2 LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1. THE GOAL WAS TO 
 CREATE A HIGH AND LOW pH, pO2 and pCO2 VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 9/18/2018
+/* Date Modified: 10/2/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -182,7 +182,7 @@ if LabChemResultNumericValue <0
 or Topography notin ('ARTERIAL BLOOD','BLOOD','VENOUS BLOOD','ARTERIAL BLD','BLOOD, VENOUS',
 'BLOOD, ARTERIAL','BLOOD VENOUS','ART BLOOD','VENOUS BLD','BLOOD (VENOUS)','BLOOD,ARTERIAL','WHOLE BLOOD','PLASMA',
 'SERUM') or clean_unit notin ('MMHG','MM/HG','TORR','') then delete; 
-lab_id=_N_; /*assign each lab an unique ID to use in later step*/
+lab_id=_N_; /*assign each lab an unique ID to use in later step with exclusions*/
 RUN;
 
 /*check "blood"*/
@@ -273,6 +273,7 @@ proc means data=ven_blood MIN MAX MEAN MEDIAN Q1 Q3;
 var LabChemResultNumericValue;
 run; /**EXCLUDE**/
 
+/**************************************************/
 /*check missing labs*/
 data missing_labs; 
 set PO2_labs_all_2014_2017_V3;
@@ -280,33 +281,75 @@ if clean_unit = '';
 run;
 proc means data=missing_labs MIN MAX MEAN MEDIAN Q1 Q3;
 var LabChemResultNumericValue;
-run;/**KEEP**/
+run; 
 
+/*de-bug labs with missing units by looking at distributions by LOINC*/
+/*get LOINC code and LabChemTestNames back*/
+proc sql;
+create table missing_labs_v2 (compress=yes) as 
+select a.*, b.LabChemTestName, c.LOINC, c.Component as LOINC_Component
+from missing_labs a
+left join ALL_LABTESTNAMES b on a.sta3n=b.sta3n and a.Labchemtestsid=b.Labchemtestsid /*ALL_LABTESTNAMES pulled from CDW: [CDWWork].[Dim].[LabChemTest] */
+left join ALL_loincsid c on a.sta3n=c.sta3n and a.LOINCSID=c.LOINCSID; /*ALL_loincsid pulled from CDW:  [CDWWork].[Dim].[loinc]*/
+quit;
 
+proc freq data=missing_labs_v2 order=freq;
+table loinc;
+run;
+
+data missing_loinc;
+set missing_labs_v2;
+if loinc='';
+run;
+proc freq data=missing_loinc order=freq;
+table LabChemTestName  ;
+run;
+proc means data=missing_loinc MIN MAX MEAN MEDIAN Q1 Q3;
+var LabChemResultNumericValue;
+run;
+
+data one ;
+set missing_labs_v2;
+if loinc='2708-6'; /*change loinc code for each*/
+run;
+proc means data=one MIN MAX MEAN MEDIAN Q1 Q3;
+var LabChemResultNumericValue; /*access each loinc code's distribution*/
+run;
+
+data missing_labs_keep    missing_labs_exclude; 
+set missing_labs_v2;
+if loinc in ('19255-9') then output missing_labs_keep; /*Principle Investigator only decided to keep LOINC 19255-9*/
+else output missing_labs_exclude ;
+run;
+
+data missing_labs_exclude;
+set missing_labs_exclude;
+exclude_missing_unit=1;
+run;
 
 /*	ONLY keep blood with LOINC code 11556-8, 2703-7, & 19254-2, 
-arterial blood, those with missing units, and those in permissible range 15-720 mmHg*/
+arterial blood, those missing unit labs with loinc of 19255-9, and those in permissible range 15-720 mmHg*/
 /*left join blood_exclude indicator to dataset*/
 proc sql;
 create table PO2_labs_all_2014_2017_V3b (compress=yes) as 
-select a.*, b.exclude
+select a.*, b.exclude, c.exclude_missing_unit
 from PO2_labs_all_2014_2017_V3 a
-left join blood_exclude b on a.lab_id=b.lab_id;
+left join blood_exclude b on a.lab_id=b.lab_id
+left join missing_labs_exclude c on a.lab_id=c.lab_id;
 quit;
 
 DATA PO2_labs_all_2014_2017_V4; 
 SET PO2_labs_all_2014_2017_V3b;
 if LabChemResultNumericValue <15 or LabChemResultNumericValue > 720 
 or Topography in ('VENOUS BLOOD','BLOOD, VENOUS','BLOOD VENOUS','VENOUS BLD','BLOOD (VENOUS)')
-or exclude=1 then delete; 
+or exclude=1 or exclude_missing_unit=1 then delete; 
 RUN;
 
 proc means data=pO2_labs_all_2014_2017_V4 MIN MAX MEAN MEDIAN Q1 Q3;
 var LabChemResultNumericValue;
 run;
 
-
-/*create HI & LO values by date*/
+/*create HI & LO values by patient & date*/
 PROC SQL;
 CREATE TABLE final.all_PO2_hi_lo_2014_2017 (compress=yes)  AS  
 SELECT *, max(LabChemResultNumericValue) as hi_PO2_daily, min(LabChemResultNumericValue) as lo_PO2_daily
@@ -315,13 +358,12 @@ GROUP BY patienticn, LabSpecimenDate
 ORDER BY patienticn, LabSpecimenDate;
 QUIT;
 
-PROC SORT DATA= final.all_PO2_hi_lo_2014_2017   nodupkey ; 
+PROC SORT DATA= final.all_PO2_hi_lo_2014_2017   nodupkey; 
 BY  patienticn LabSpecimenDate hi_PO2_daily lo_PO2_daily;
 RUN;
 
 
-/************** pCO2 Labs **************/
-
+/*********************** pCO2 Labs **************************/
 /**** DOWNLOAD DFLT TABLE INTO SAS DATASET FROM VINCI ****/
 PROC SQL ;   
 CONNECT TO OLEDB  AS CDW1 ( PROVIDER=SQLNCLI11  DATASOURCE=&data_source.
