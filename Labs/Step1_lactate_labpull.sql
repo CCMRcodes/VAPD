@@ -1,7 +1,7 @@
 /*Below SQL code will pull Lactate labs from CDW*/
 /*Step 2 will download the saved Lactate lab pull table into SAS dataset for further cleaning*/
 
-/* Date Modified: 8/20/2018
+/* Date Modified: 10/11/2018
    Author: Shirley Wang */
 
 use /*INSERT STUDY NAME*/

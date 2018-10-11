@@ -1,7 +1,7 @@
 /*Below SQL code will pull pH, pO2 and pCO2 labs from CDW*/
 /*Step 2 will download the saved pH, pO2 and pCO2 lab pull tables into SAS dataset for further cleaning*/
 
-/* Date Modified: 8/20/2018
+/* Date Modified: 10/11/2018
    Author: Shirley Wang */
 
 use /*INSERT STUDY NAME*/
@@ -57,7 +57,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+     WHERE loincsid=-1 and  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
 
 /*get unique PatientICN*/
@@ -119,7 +119,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+     WHERE  /* loincsid=-1 and */  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
 
 /*get unique PatientICN*/
@@ -181,7 +181,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+     WHERE  loincsid=-1 and  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
 
 /*get unique PatientICN*/

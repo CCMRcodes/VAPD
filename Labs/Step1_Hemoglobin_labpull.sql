@@ -1,7 +1,7 @@
 /*Below SQL code will pull Hemoglobin labs from CDW*/
 /*Step 2 will download the saved Hemoglobin lab pull table into SAS dataset for further cleaning*/
 
-/* Date Modified: 8/20/2018
+/* Date Modified: 10/11/2018
    Author: Shirley Wang */
 
 use /*INSERT STUDY NAME*/
@@ -12,7 +12,7 @@ select LOINC, Component, Sta3n, LOINCSID
 into #loinc
 from [CDWWork].[Dim].[loinc]
 where loinc in ('20509-6', '24360-0', '30313-1', '30350-3', '30351-1', '30352-9', '35183-3', '59260-0', '718-7', '14775-1', '30353-7', 
-'30354-5', '33025-8', '33026-6', '48725-6', '54289-4', '55782-7', '61180-6', '75928-2', '76768-1', '76769-9', '4635-9', '717-9', '721-1')
+'30354-5', '33025-8', '33026-6', '48725-6', '54289-4', '55782-7', '61180-6', '75928-2', '76768-1', '76769-9','4635-9','717-9','721-9')
 
 /*pull in Labchemtest*/
 SELECT Labchemtestsid, LabChemTestName, LabChemPrintTestName, Sta3n
@@ -56,7 +56,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE /* loincsid=-1 and */    
+     WHERE  loincsid=-1 and    
       a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
 

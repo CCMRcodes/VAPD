@@ -1,7 +1,7 @@
 /*Below SQL code will pull Glucose labs from CDW*/
 /*Step 2 will download the saved Glucose lab pull table into SAS dataset for further cleaning*/
 
-/* Date Modified: 8/20/2018
+/* Date Modified: 10/11/2018
    Author: Shirley Wang */
 
 use /*INSERT STUDY NAME*/
@@ -11,7 +11,7 @@ go
 select LOINC, Component, Sta3n, LOINCSID
 into #loinc
 from [CDWWork].[Dim].[loinc]
-where loinc in ('14743-9', 
+where loinc in ('27353-2', '14743-9', 
 '14749-6', 
 '1547-9', 
 '16165-3', 
@@ -833,7 +833,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+     WHERE /* loincsid=-1 and */ a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
 
 /*get unique PatientICN*/
