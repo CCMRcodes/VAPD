@@ -9,10 +9,6 @@ go
 
 
 /********* pH Labs *********/
-
-drop table #loinc
-drop table #labtestnames
-
 /*pull in all loincsids*/
 select LOINC, Component, Sta3n, LOINCSID
 into #loinc
