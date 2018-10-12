@@ -61,7 +61,7 @@ RUN;
 DATA Hematocrit_2014_2017_v5; 
 SET Hematocrit_2014_2017_v4 ;
 if Topography notin ('BLOOD','ARTERIAL BLOOD','WHOLE BLOOD','VENOUS BLOOD','BLOOD, VENOUS','ARTERIAL BLD','VENOUS BLD',
-'BLOOD VENOUS','BLOOD, ARTERIAL','BLOOD (VENOUS)','PLASMA','SERUM','WS-BLOOD') 
+'BLOOD VENOUS','BLOOD, ARTERIAL','BLOOD (VENOUS)','PLASMA','SERUM') 
 or  clean_unit notin ('%','%PCV','VOL%','%VOLUME','"%"','PERCENT','PCV%','PCV','') or LabChemResultNumericValue <0
    then delete;
 RUN;
