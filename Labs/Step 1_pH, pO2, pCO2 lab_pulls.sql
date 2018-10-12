@@ -9,6 +9,7 @@ go
 
 
 /********* pH Labs *********/
+
 /*pull in all loincsids*/
 select LOINC, Component, Sta3n, LOINCSID
 into #loinc
@@ -72,12 +73,9 @@ left join src.CohortCrosswalk b on a.patientsid=b.PatientSID
 /***************************************************************************************************************************************/
 /********* pO2 Labs *********/
 
-drop table #loinc
-drop table #labtestnames
-
 /*pull in all loincsids*/
 select LOINC, Component, Sta3n, LOINCSID
-into #loinc
+into #loinc_pO2
 from [CDWWork].[Dim].[loinc]
 where loinc in ('19218-7', '19254-2', '19255-9','19256-7', '19980-2', '19981-0', '19982-8', '19983-6', '19997-6', '19998-4', 
 '19999-2', '20000-6', '20001-4', '20002-2','20003-0', '20004-8', '20005-5', '20006-3', '20007-1', '20008-9', '20009-7', '20010-5', 
@@ -87,7 +85,7 @@ where loinc in ('19218-7', '19254-2', '19255-9','19256-7', '19980-2', '19981-0',
 
 /*pull in Labchemtest*/
 SELECT Labchemtestsid, LabChemTestName, LabChemPrintTestName, Sta3n
-into #labtestnames
+into #labtestnames_pO2
 FROM  [CDWWork].[Dim].[LabChemTest]
 WHERE labchemtestname in ('PO2', 'PO2 AT PT. TEMP', 'pO2','POC-pO2', 'PO2 (POC)', 'PARTIAL PRESSURE OF OXYGEN (pO2)', 'GEM-PO2', 
 'pO2 (BGL4)','GEM-PO2 (Temp. corrected)', 'POC PO2','PO2, ANC', 'AT- PO2', 'O2CT.', 'POC pO2', 'O2 CT', 'ABG,ctO2', 'ABG,pO2(T)', 'POC-PO2', 
@@ -111,7 +109,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 into #pO22014_2017
 FROM  src.Chem_PatientLabChem AS A
-INNER JOIN #loinc b on  a.Loincsid=b.Loincsid 
+INNER JOIN #loinc_pO2 b on  a.Loincsid=b.Loincsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
 	WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
@@ -121,7 +119,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
        a.LabChemTestSID, a.PatientSID, a.LabChemSpecimenDateTime, a.LabChemSpecimenDateSID, a.LabChemCompleteDateTime, a.LabChemCompleteDateSID,
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 FROM src.Chem_PatientLabChem a         
-INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
+INNER JOIN #labtestnames_pO2 b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
      WHERE  /* loincsid=-1 and */  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
@@ -137,12 +135,9 @@ left join src.CohortCrosswalk b on a.patientsid=b.PatientSID
 /***************************************************************************************************************************************/
 /********* pCO2 Labs *********/
 
-drop table #loinc
-drop table #labtestnames
-
 /*pull in all loincsids*/
 select LOINC, Component, Sta3n, LOINCSID
-into #loinc
+into #loinc_pCO2
 from [CDWWork].[Dim].[loinc]
 where loinc in ('19212-0', '19223-7', '19878-8', '19879-6', '19880-4','19881-2', '19892-9', '19893-7', '19894-5', '19895-2', '19896-0', 
 '19897-8', '19898-6', '19899-4', '19900-0', '19901-8', '19902-6', '19903-4', '19904-2', '19905-9', '19906-7', '19907-5', '19908-3', '19909-1', 
@@ -151,7 +146,7 @@ where loinc in ('19212-0', '19223-7', '19878-8', '19879-6', '19880-4','19881-2',
 
 /*pull in Labchemtest*/
 SELECT Labchemtestsid, LabChemTestName, LabChemPrintTestName, Sta3n
-into #labtestnames
+into #labtestnames_pCO2
 FROM  [CDWWork].[Dim].[LabChemTest]
 WHERE labchemtestname in ('PCO2', 'PCO2 AT PT. TEMP', 'pCO2', 'POC-pCO2', 'pCO2 (BGL4)', 'PCO2 (POC)', 'GEM-PCO2', 'PARTIAL PRESSURE CARBON DIOXIDE (pCO2)', 
 'POC PCO2', 'GEM-PCO2 (Temp. Corrected)', 'POC-PCO2', 'PCO2,ANC', 'POC pCO2', 'AT- PCO2', 'ABG,pCO2(T)', 'pCO2 (T. corrected)', 'PaCO2', 
@@ -177,7 +172,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 into #pCO22014_2017
 FROM  src.Chem_PatientLabChem AS A
-INNER JOIN #loinc b on  a.Loincsid=b.Loincsid 
+INNER JOIN #loinc_pCO2 b on  a.Loincsid=b.Loincsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
 	WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
@@ -187,7 +182,7 @@ SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.
        a.LabChemTestSID, a.PatientSID, a.LabChemSpecimenDateTime, a.LabChemSpecimenDateSID, a.LabChemCompleteDateTime, a.LabChemCompleteDateSID,
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 FROM src.Chem_PatientLabChem a         
-INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
+INNER JOIN #labtestnames_pCO2 b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
      WHERE  loincsid=-1 and  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
 
