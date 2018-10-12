@@ -76,21 +76,13 @@ proc means data=LOGM_ML MIN MAX MEAN MEDIAN Q1 Q3; /*median=7.4, keep*/
 var LabChemResultNumericValue;
 run;
 
-data num; 
-set Ph2014_2017_V1;
-if clean_unit='#';
-run;
-proc means data=num MIN MAX MEAN MEDIAN Q1 Q3; /*median=7.4, keep*/
-var LabChemResultNumericValue;
-run;
-
 /*keep only those with result value in range, blood topography and acceptable unit*/
 DATA Ph2014_2017_V2; 
 SET Ph2014_2017_V1;
 if LabChemResultNumericValue <0 
 or Topography notin ('ARTERIAL BLOOD','BLOOD','VENOUS BLOOD','ARTERIAL BLD','BLOOD, VENOUS','SERUM',
 'BLOOD, ARTERIAL','BLOOD VENOUS','PLASMA','ART BLOOD','VENOUS BLD','WHOLE BLOOD','BLOOD (VENOUS)') 
-or clean_unit notin ('PH','PHUNITS','UNITS','MPH','NUL','MMHG','N/A','VENOUS','LOGM/ML','LOGMM/L','#','UNIT','')
+or clean_unit notin ('PH','PHUNITS','UNITS','MPH','NUL','MMHG','N/A','VENOUS','LOGM/ML','LOGMM/L','UNIT','')
 	then delete; 
 RUN;
 
