@@ -58,7 +58,7 @@ RUN;
 /*keep only those with blood topography and acceptable clean_unit*/
 DATA Hemoglobin_2014_2017_v5; 
 SET Hemoglobin_2014_2017_v4;
-if Topography notin ('BLOOD','ARTERIAL BLOOD','WHOLE BLOOD','VENOUS BLOOD',
+if Topography notin ('BLOOD','ARTERIAL BLOOD','WHOLE BLOOD','VENOUS BLOOD','ART BLOOD',
 'BLOOD, VENOUS','ARTERIAL BLD','BLOOD VENOUS','VENOUS BLD','BLOOD, ARTERIAL','PLASMA','SERUM',
 'BLOOD (VENOUS)') 
 or  clean_unit notin ('G/DL','GM/DL','G/100ML','GM','G%','GMS','GM%','') or LabChemResultNumericValue <0
