@@ -65,7 +65,6 @@ The SAS and SQL codes posted on this Github page are to be used for the creation
 
 
 
-**ABG lab: Mechanical Ventilation Indicator**
 
 **pH, pO2, pCO2**
 
