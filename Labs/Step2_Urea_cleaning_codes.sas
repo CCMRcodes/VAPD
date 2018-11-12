@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES UREA LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW UREA VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 9/12/2018
+/* Date Modified: 11/12/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -58,12 +58,16 @@ TABLE topography clean_unit;
 RUN;
 
 /*keep only those with result value >0, blood topography and acceptable clean_unit*/
+
+/*Separately, accessed lab with unit of 'MG/ML' and looked at it's distribution. Conclusion: incluse lab with unit 'MG/ML', no need 
+for conversion to 'MG/DL' because the distribution of 'MG/ML' looks right, think this unit was a typo by sta3n 596*/
+
 DATA  Urea_2014_2017_v6; 
 SET   Urea_2014_2017_v4;
 if LabChemResultNumericValue <0  or Topography notin ('PLASMA','SERUM','BLOOD','SER/PLA','BLOOD*',
 'BLOOD.','BLOOD, VENOUS','VENOUS BLD','VENOUS BLOOD','BLOOD VENOUS','serum','ARTERIAL BLOOD',
 'SER/PLAS','ARTERIAL BLD')
-   or  clean_unit notin ('MG/DL','MMOL/L','') then delete; 
+   or  clean_unit notin ('MG/ML','MG/DL','MMOL/L','') then delete; 
 RUN;
 
 /*check missing labs*/

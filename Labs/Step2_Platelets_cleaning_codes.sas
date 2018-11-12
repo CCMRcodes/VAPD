@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES PLATELET LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1 SQL CODE. THE GOAL WAS TO 
 CREATE A HIGH AND LOW PLATELET VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 9/12/2018
+/* Date Modified: 11/12/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -64,7 +64,7 @@ if topography notin ('BLOOD','WHOLE BLOOD','PLASMA','BLOOD,CAPILLARY','SERUM','W
 'ARTERIAL BLOOD','BLOOD, VENOUS','PLASMA+SERUM','SER/PLA','SERUM/BLOOD') or clean_unit notin ('K/CMM','K/UL','K/MM3','10*3/UL',
 '10E3/UL','X1000/UL','10E9/L','X10-3','K/MCL','X10-3/UL','K/CUMM','BILL/L','THOUS/CMM','10(3)/MCL','THOU/CUMM','1000/UL',
 'THOU/UL','T/CMM','1.00E+04','X103','K/CCM','10X3/CMM','103/UL','K/MICROL','X10E3/UL','X(10)3',"10'3/UL",'X1000','10X3/UL',
-'THOU','TH/MM3','1000/MCL','TH/UL','THOUS/UL','X10(9)/L','10*9/L','X10(3)/UL','K/CM','10*3UL','1000/MM3','') 
+'THOU','TH/MM3','1000/MCL','TH/UL','THOUS/UL','X10(9)/L','10*9/L','X10(3)/UL','K/CM','10*3UL','1000/MM3','','10**3') 
 or LabChemResultNumericValue <0
 	then delete;
 RUN;
@@ -87,7 +87,7 @@ set platelet_all_2014_2017_v2;
 if clean_unit ='' then delete;
 run;
 
-/*Only keep those labs within permissible range 1-1500 (1 10^9/L=1000/MCL, no conversions) */
+/*Only keep those labs within permissible range 1-1500 (1 10^9/L=1000/MCL, no conversions needed) */
 data platelet_all_2014_2017_v3; 
 set platelet_all_2014_2017_v3;
 if LabChemResultNumericValue <1 or LabChemResultNumericValue>1500 then delete;
