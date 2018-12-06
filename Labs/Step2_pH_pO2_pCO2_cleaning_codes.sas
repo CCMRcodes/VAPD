@@ -1,7 +1,7 @@
 /******** THIS EXAMPLE SAS CODE INCLUDES pH, pO2 and pCO2 LOINC CODES AND FACILITY LAB TEST NAMES PULLED FROM THE VA CDW IN STEP 1. THE GOAL WAS TO 
 CREATE A HIGH AND LOW pH, pO2 and pCO2 VALUE FOR EACH PATIENT-DAY WHILE INPATIENT *********/
 
-/* Date Modified: 10/2/2018
+/* Date Modified: 12/6/2018
    Author: Shirley Wang */
 
 libname final ''; /*insert file path/directory*/
@@ -52,6 +52,14 @@ TABLE  topography clean_unit;
 RUN;
 
 /*check some lab values by unit*/
+data NUM; 
+set Ph2014_2017_V1;
+if clean_unit='#';
+run;
+proc means data=NUM MIN MAX MEAN MEDIAN Q1 Q3; /*median=7.4, keep*/
+var LabChemResultNumericValue;
+run;
+
 data nul; 
 set Ph2014_2017_V1;
 if clean_unit='NUL';
@@ -76,13 +84,23 @@ proc means data=LOGM_ML MIN MAX MEAN MEDIAN Q1 Q3; /*median=7.4, keep*/
 var LabChemResultNumericValue;
 run;
 
+data num; 
+set Ph2014_2017_V1;
+if clean_unit='#';
+run;
+proc means data=num MIN MAX MEAN MEDIAN Q1 Q3; /*median=7.4, keep*/
+var LabChemResultNumericValue;
+run;
+
 /*keep only those with result value in range, blood topography and acceptable unit*/
 DATA Ph2014_2017_V2; 
 SET Ph2014_2017_V1;
 if LabChemResultNumericValue <0 
 or Topography notin ('ARTERIAL BLOOD','BLOOD','VENOUS BLOOD','ARTERIAL BLD','BLOOD, VENOUS','SERUM',
-'BLOOD, ARTERIAL','BLOOD VENOUS','PLASMA','ART BLOOD','VENOUS BLD','WHOLE BLOOD','BLOOD (VENOUS)') 
-or clean_unit notin ('PH','PHUNITS','UNITS','MPH','NUL','MMHG','N/A','VENOUS','LOGM/ML','LOGMM/L','UNIT','')
+'BLOOD, ARTERIAL','BLOOD VENOUS','PLASMA','ART BLOOD','VENOUS BLD','WHOLE BLOOD','BLOOD (VENOUS)','BLOOD,ARTERIAL',
+'MIXED VENOUS BLOOD','MIXED-VENOUS BLOOD','MIXED VENOUS','VENOUS BLOOD (MIXED)','BLOOD MIXED ART/VENOUS','MIXED VEN BLOOD','BLOOD, MIXED VENOUS',
+'MIXED VEN/ART BLD','ABLD') 
+or clean_unit notin ('PH','PHUNITS','UNITS','MPH','NUL','MMHG','N/A','VENOUS','LOGM/ML','LOGMM/L','UNIT','','#')
 	then delete; 
 RUN;
 
@@ -404,7 +422,8 @@ SET PCo22014_2017_V1;
 if LabChemResultNumericValue <0
 or Topography notin ('ARTERIAL BLOOD','BLOOD','VENOUS BLOOD','ARTERIAL BLD','BLOOD, VENOUS',
 'BLOOD VENOUS','BLOOD, ARTERIAL','VENOUS BLD','PLASMA','ART BLOOD','BLOOD (VENOUS)',
-'PERIPHERAL VENOUS BLOOD','BLOOD,ARTERIAL','WHOLE BLOOD','SERUM') 
+'PERIPHERAL VENOUS BLOOD','BLOOD,ARTERIAL','WHOLE BLOOD','SERUM','MIXED VENOUS BLOOD','MIXED-VENOUS BLOOD','MIXED VENOUS',
+'BLOOD MIXED ART/VENOUS','VENOUS BLOOD (MIXED)','MIXED VEN BLOOD','BLOOD, MIXED VENOUS', 'MIXED VEN/ART BLD','ABLD','BLOOD UNSPECIFIED') 
 or clean_unit notin ('MMHG','MMOL/L','MEQ/L','MM/HG','TORR','MM/L','') then delete; 
 RUN;
 
