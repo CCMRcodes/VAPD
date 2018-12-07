@@ -4,7 +4,7 @@
 /* Date Modified: 12/6/2018
    Author: Shirley Wang */
 
-use ord_iwashyna_201108021D
+use /*INSERT STUDY NAME*/
 go
 
 
