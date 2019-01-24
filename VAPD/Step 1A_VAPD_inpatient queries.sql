@@ -1,7 +1,7 @@
 /*Step 1 of building a VA inpatient database*/
 /*Below SQL code pulls VA acute inpatient records including diagnosis codes from specialty stays.*/
 
-/* Date Modified: 9/21/2018
+/* Date Modified: 1/24/2019
    Author: Brenda Vincent */
 
 use /*INSERT STUDY NAME*/
@@ -24,10 +24,10 @@ case when specialty in ('ANESTHESIOLOGY',
 					'zHEMATOLOGY/ONCOLOGY','zMETABOLIC','zNEUROLOGY','zNEUROSURGERY','zOPHTHALMOLOGY',
 					'zORTHOPEDIC','zPERIPHERAL VASCULAR', 'zPODIATRY', 'zPROCTOLOGY', 'zPULMONARY, NON-TB',
 					'zPULMONARY, TUBERCULOSI', 'zSTROKE UNIT','zSURGICAL ICU','zTELEMETRY','zUROLOGY',
-					'ZZPULMONARY DISEASE','MEDICAL OBSERVATION','SURGICAL OBSERVATION','ED OBSERVATION','NEUROLOGY OBSERVATION') 
-					     then 1 else 0 end as acute
+					'ZZPULMONARY DISEASE','MEDICAL OBSERVATION','SURGICAL OBSERVATION','ED OBSERVATION','NEUROLOGY OBSERVATION')
+						 then 1 else 0 end as acute
 into dflt.acutespecialty
-from cdwwork.dim.treatingspecialty
+from cdwwork.dim.treatingspecialty--14647
 
 /*Inpat.SpecialtyTransfer Records*/
 declare @STARTDATE2 datetime2 ='20140101', @ENDDATE2 datetime2 ='20180201'
@@ -188,7 +188,7 @@ into #vapd_inpat
 from dflt.merged_vapd_inpat
 where dischargedatetime is not null
 
-drop table dflt.merged_vapd_inpat
+drop table dflt.merged_vapd_inpat,  dflt.merged_vapd_inpat2, dflt.acutespecialty, dflt.acutetreatingspecialty
 
 select *
 into dflt.vapd_inpat
@@ -197,6 +197,9 @@ from #vapd_inpat--56,033,770
 select count(distinct patienticn) from dflt.vapd_inpat  
 select count(distinct inpatientsid) from dflt.vapd_inpat 
 
-
+select *
+from dflt.vapd_inpat
+where patientsid=13394842 and ordinalnumber=1 
+order by specialtytransferdatetime;
 
 /*Download dflt.vapd_inpat into a SAS dataset for further data management*/
