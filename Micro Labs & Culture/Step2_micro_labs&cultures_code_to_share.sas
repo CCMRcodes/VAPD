@@ -1,4 +1,6 @@
 /*STEP 2 of micro biology labs and cultures*/
+/* Date Modified: 3/11/2019
+   Author: Shirley Wang */
 
 /*Goal: for every patient-day, indicate (1=yes, 0=no) whether the patient had other micro biology labs or cultures done that day*/
 /*There will be 2 final datasets: 1) other micro biology labs,  2) cultures*/
@@ -62,7 +64,8 @@ quit;
 ***Sent the above to PI in excel file then...
 
 ***PI marked which of these to keep as blood culture--import from excel to determine which to keep;
-proc import file='INSERT PATH.xlsx'
+/*if PI want to skip this step and just replicate what we did, we've saved this excel file as "blood cultures only_tji" for you to use*/
+proc import file='INSERT PATH for blood cultures only_tji.xlsx'
 dbms=xlsx out=bloodcult replace;
 run;
 
