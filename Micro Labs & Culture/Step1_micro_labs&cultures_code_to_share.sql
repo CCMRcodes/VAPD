@@ -1,3 +1,6 @@
+/* Date Modified: 6/16/2018
+   Author: Shirley Wang */
+
 /*Below sql code is to extract micro biology labs and cultures for the VAPD. Principle Investigators (PI) came up with a list of test names of interest.
 These CSV files need to be uploaded into the Research database in CDW: 
 1)lab chem test names_round2
