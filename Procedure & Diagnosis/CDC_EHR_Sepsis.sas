@@ -14,7 +14,7 @@ DATA raw.basic (rename=(inpatientsid=admission_id patienticn=patient_id sta6a=ho
 		hosp_LOS=discharge_date  hospital_day=day) compress=yes); 
 retain patienticn sta6a  inpatientsid age gender race admityear newadmitdate  newdischargedate datevalue  hospital_day hosp_LOS
 icu_day readmit30 inhospmort mort30 discharge_dispo;
-SET  raw.vapd_daily&year._v23 ; /*dataset was saved from step 3 of VAPD*/
+SET  raw.vapd_daily&year._v23 ; /*dataset was saved from step 2 of VAPD*/
 keep patienticn sta6a  inpatientsid age gender race admityear newadmitdate  newdischargedate datevalue specialtytransferdate specialtydischargedate
 hospital_day hosp_LOS icu_day   readmit30 inhospmort mort30 discharge_dispo ;
 RUN; 
