@@ -886,6 +886,7 @@ label
 new_teaching ='new teaching indicator (COTH Member 2007 + 2018)';
 run;
 
+/*first import the hospital.xlsx file into SAS dataset, save it as icu.hospital*/
 /*sta6a=facility on site_level dataset & hosptal dataset,  sta3n=facility on level_beds, */
 DATA hospital_data ;
 SET icu.hospital ;
@@ -1508,4 +1509,11 @@ RUN;
 /*save a final copy for the VAPD folder and one for the temp folder*/
 DATA icu.vapd_daily&year._20190111 (compress=yes); 
 SET  vapd_daily&year._20190111_v4;
+RUN;
+
+/*During February 2019 VAPD meeting, the group decided to drop sta6a (facilities) with less than 1000 patient-facility-days in the VAPD 2014-2017.*/
+/*check the descriptive of each facilities first, delete the facilities with less than 1000 patient-facility-days in the VAPD*/
+DATA  icu.vapd_daily&year._20190111 (compress=yes); /*N pat-days total*/
+SET icu.vapd_daily&year._20190111 ;
+if sta6a in ('509A0','619A4','561A4','610','620','636A4','674A4','671A4','640A0','648A4','596','663A4','523'); /*These are the ones we found and dropped from the VAPD 2014-2017*/
 RUN;
