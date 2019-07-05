@@ -1,0 +1,251 @@
+/*Below code uses VAPD hospitalization day =1 (day of admission) to obtain the VA illness severity (VA risk score) for each hospitalization.
+It gives a probability of 30 day mortality from admission*/
+
+%let year=20142017;
+libname vapd "VAPD_dataset";
+
+/*TOP 20 most common single level CCS for the VAPD*/
+PROC SORT DATA=vapd.vapd_daily20142017 nodupkey out=vapd_hosp;
+BY patienticn sta3n new_admitdate2 new_dischargedate2 singlelevel_ccs multilevel1_ccs;
+RUN;
+
+PROC FREQ DATA=vapd_hosp  order=freq;
+TABLE singlelevel_ccs multilevel1_ccs;
+RUN;
+/*TOP 20 Single CCS 
+108
+102
+101
+106
+660
+2
+127
+122
+197
+203
+237
+238
+50
+131
+159
+157
+205
+100
+55
+153
+*/
+
+/*Create indicators for the top 20 dx codes,  singlelevel_ccs is #, multilevel1_ccs is character*/
+data vapd_daily&year._20190426_v6 (compress=yes); 
+set vapd.vapd_daily20142017;
+/*single level CCS variables*/
+	if singlelevel_ccs=108 then chf_nonhp=1; else chf_nonhp=0;
+	if singlelevel_ccs=102 then chestpain=1;else chestpain =0;
+	if singlelevel_ccs=101 then coron_athero=1;else coron_athero =0;
+	if singlelevel_ccs=106 then dysrhythmia=1;else dysrhythmia =0;
+	if singlelevel_ccs=660 then alcohol=1; else  alcohol=0;
+	if singlelevel_ccs=2 then sepsis=1; else sepsis=0;
+	if singlelevel_ccs=127 then copd=1;else  copd=0;
+	if singlelevel_ccs=122 then pneumonia=1; else  pneumonia=0;
+	if singlelevel_ccs=197 then skin_infection=1;else skin_infection =0;
+	if singlelevel_ccs=203 then osteoarthros=1;else osteoarthros=0;
+	if singlelevel_ccs=237 then complic_devi=1;else complic_devi =0;
+	if singlelevel_ccs=238 then complic_proc=1;else complic_proc =0;
+	if singlelevel_ccs=50 then diabmel_w_cm=1;else  diabmel_w_cm=0;
+	if singlelevel_ccs=131 then adlt_resp_fl=1;else adlt_resp_fl =0;
+	if singlelevel_ccs=159 then uti=1;else uti =0;
+	if singlelevel_ccs=157 then acute_ren_fail=1;else acute_ren_fail =0;
+	if singlelevel_ccs=205 then backproblem=1;else backproblem =0;
+	if singlelevel_ccs=100 then acute_mi=1;else acute_mi =0;
+	if singlelevel_ccs=153 then gi_hemorrhag=1;else gi_hemorrhag =0;
+	if singlelevel_ccs=55 then Fluid_elc_dx=1; else Fluid_elc_dx =0;
+/*multi-level, level 1 CCS variables*/
+	if multilevel1_ccs ='1' then Infect_parasitic_dis=1; else Infect_parasitic_dis=0;
+	if multilevel1_ccs ='2' then Neoplasms=1; else Neoplasms=0;
+	if multilevel1_ccs ='3' then Endocrine=1; else Endocrine=0;
+	if multilevel1_ccs ='4' then blood_dis=1; else  blood_dis=0;
+	if multilevel1_ccs ='5' then Mental_Illness=1; else Mental_Illness=0;
+	if multilevel1_ccs ='6' then nervous_dis=1; else nervous_dis=0;
+	if multilevel1_ccs ='7' then circulatory=1; else circulatory=0;
+	if multilevel1_ccs ='8' then respiratory=1; else respiratory=0;
+	if multilevel1_ccs ='9' then digestive=1; else digestive=0;
+	if multilevel1_ccs ='10' then genitourinary=1; else genitourinary=0;
+	if multilevel1_ccs ='11' then pregnancy=1; else pregnancy	=0;
+	if multilevel1_ccs ='12' then skin=1; else skin=0;
+	if multilevel1_ccs ='13' then musculoskeletal=1; else musculoskeletal=0;
+	if multilevel1_ccs ='14' then Congenital_anomalies=1; else Congenital_anomalies=0;
+	if multilevel1_ccs ='15' then perinatal =1; else perinatal =0;
+	if multilevel1_ccs ='16' then Injury_poisoning=1; else Injury_poisoning=0;
+	if multilevel1_ccs ='17' then illdefined_conditions =1; else illdefined_conditions=0;
+	if multilevel1_ccs ='18' then unclassified=1; else unclassified=0;
+run;
+
+/*APACHE III scores*/
+DATA vapd_daily&year._20190426_v9 (compress=yes);
+SET  vapd_daily&year._20190426_v6;
+/*convert lab values*/
+/*albumin, g/l*/
+if hi_Albumin_daily=. then albval_sc=0;
+ else if hi_Albumin_daily < 2.0  then albval_sc=11; /*added 8/27/18*/
+ else if 2.0<=hi_Albumin_daily<2.5 then albval_sc=6;
+ else if 2.5<=hi_Albumin_daily<=4.4 then albval_sc=0;
+ else if hi_Albumin_daily>4.4 then albval_sc=4;
+
+ /*The Render 2000 have the converted bili and urea units in US already, use that*/
+ /*glucose mg/dl*/
+if hi_Glucose_daily= . then glucose_sc=0;
+  else if hi_Glucose_daily<40 then glucose_sc=19;
+  else if 40<=hi_Glucose_daily<60 then glucose_sc=18;
+  else if 60<=hi_Glucose_daily<200 then glucose_sc=0;
+  else if 200<=hi_Glucose_daily=<350 then glucose_sc=3;
+  else if hi_Glucose_daily>350 then glucose_sc=5;
+
+/*creatinine (mg/dl) for GFR*/ /*creat units are in mg/dl, render used that*/
+if hi_creat_daily = .  then creat_sc=0; /*added 8/27/18*/
+ else if hi_creat_daily < 0.4 then creat_sc=3;
+ else if hi_creat_daily > 1.94 then creat_sc=7;
+ else if 0.4<=hi_creat_daily < 1.51 then creat_sc=0;
+ else if 1.51<=hi_creat_daily <= 1.94 then creat_sc=4;
+
+/*bilirubin, mg/dl*/
+if hi_bili_daily=. then bili_sc=0;
+	else if hi_bili_daily<2.0 then bili_sc=0;
+	else if 2<=hi_bili_daily<3 then bili_sc=5;
+	else if 3<=hi_bili_daily<5 then bili_sc=6;
+	else if 5<=hi_bili_daily<8 then bili_sc=8;
+	else if hi_bili_daily>=8 then bili_sc=16;
+
+/*urea, mg/dl*/
+if hi_urea_daily= . then bun_sc=0;
+	else if hi_urea_daily<17 then bun_sc=0;
+	else if 17<=hi_urea_daily<20 then bun_sc=2;
+	else if 20<=hi_urea_daily<40 then bun_sc=7;
+	else if 40<=hi_urea_daily<80 then bun_sc=11;
+	else if hi_urea_daily>=80 then bun_sc=12;
+
+/*sodium, meq/l=mmol/l*/
+if hi_sodium_daily=. then na_sc=0;
+ else if hi_sodium_daily<120 then na_sc=3;
+ else if hi_sodium_daily>=155 then na_sc=4;
+ else if 135<=hi_sodium_daily<155 then na_sc=0;
+ else if 120<=hi_sodium_daily<135 then na_sc=2;
+
+/*WBC*/
+if hi_WBC_daily=. then wbc_sc=0;
+ else if hi_WBC_daily <1 then wbc_sc=19;
+ else if hi_WBC_daily >=25  or 1<=hi_WBC_daily <3 then wbc_sc=5;
+ else if 3<=hi_WBC_daily <20 then wbc_sc=0;
+ else if 20<=hi_WBC_daily <25 then wbc_sc=1;
+
+/*Hematocrit*/
+if hi_Hematocrit_daily=. then hct_sc=0;
+	else if hi_Hematocrit_daily<41 or hi_Hematocrit_daily>=50 then hct_sc=3;
+	else if 41<=hi_Hematocrit_daily<50 then hct_sc=0;
+
+/*pO2*/
+if hi_PO2_daily=. then pao2_sc=0;
+	else if hi_PO2_daily<=50 then pao2_sc=15;
+	else if 50=<hi_PO2_daily<70 then pao2_sc=5;
+	else if 70=<hi_PO2_daily<80 then pao2_sc=2;
+	else if hi_PO2_daily>=80 then pao2_sc=0;
+
+/*/*pCO2*/*/
+/*if hi_pCO2_daily=. then pco2_sc=0;*/
+
+/*pH and pCO2 values don't need to convert*/
+/*pH score--from Anzics core APD programmer's data dictionary*/
+/*version 5.6 page 94*/;
+if lo_ph_daily<7.2 and hi_pCO2_daily<50 then ph_sc=12;
+if lo_ph_daily<7.2 and hi_pCO2_daily>=50 then ph_sc=4;
+if 7.20<=lo_ph_daily<7.35 and hi_pCO2_daily<30 then ph_sc=9;
+if 7.20<=lo_ph_daily<7.30 and 30<=hi_pCO2_daily<40 then ph_sc=6;
+if 7.20<=lo_ph_daily<7.30 and 40<=hi_pCO2_daily<50 then ph_sc=3;
+if 7.20<=lo_ph_daily<7.30 and hi_pCO2_daily>=50 then ph_sc=2;
+if 7.35<=lo_ph_daily<7.50 and hi_pCO2_daily<30 then ph_sc=5;
+if 7.30<=lo_ph_daily<7.45 and 30<=hi_pCO2_daily<45 then ph_sc=0;
+if 7.30<=lo_ph_daily<7.45 and hi_pCO2_daily>=45 then ph_sc=1;
+if 7.45<=lo_ph_daily<7.50 and 30<=hi_pCO2_daily<35 then ph_sc=0;
+if 7.45<=lo_ph_daily<7.50 and 35<=hi_pCO2_daily<45 then ph_sc=2;
+if 7.50<=lo_ph_daily<7.60 and hi_pCO2_daily<40 then ph_sc=3;
+if lo_ph_daily>=7.60 and hi_pCO2_daily<=25 then ph_sc=0;
+if lo_ph_daily>=7.60 and 25<hi_pCO2_daily<=40 then ph_sc=3;
+if lo_ph_daily>=7.50 and hi_pCO2_daily>=40 then ph_sc=12;
+if 7.45<=lo_ph_daily<7.50 and hi_pCO2_daily>=45 then ph_sc=12;
+RUN;
+
+PROC FREQ DATA= vapd_daily&year._20190426_v9 order=freq;
+TABLE  wbc_sc albval_sc bili_sc bun_sc glucose_sc 
+hct_sc na_sc pao2_sc  ph_sc creat_sc;
+RUN;
+
+
+/*Outcome 30-day mortality: mort30*/
+DATA vapd_daily&year._20190426_v10 (compress=yes); 
+SET vapd_daily&year._20190426_v9;
+if hosp_day1_ind=1; /*at admission*/
+keep patienticn sta6a datevalue hospital_day new_admitdate2 new_dischargedate2  unique_hosp_count_id icu 
+gender age  hispanic race mort30_admit hospital_day hosp_day1_ind 
+chf_nonhp sepsis alcohol dysrhythmia pneumonia 
+copd coron_athero osteoarthros skin_infection chestpain 
+complic_devi uti diabmel_w_cm complic_proc acute_ren_fail 
+backproblem acute_mi adlt_resp_fl  gi_hemorrhag  Fluid_elc_dx
+Infect_parasitic_dis Neoplasms Endocrine blood_dis Mental_Illness nervous_dis circulatory respiratory
+digestive genitourinary pregnancy skin musculoskeletal Congenital_anomalies perinatal Injury_poisoning
+illdefined_conditions unclassified
+wbc_sc albval_sc bili_sc bun_sc glucose_sc 
+hct_sc na_sc pao2_sc ph_sc  creat_sc
+htn  chf  cardic_arrhym  valvular_d2  pulm_circ  pvd  paralysis  neuro  pulm  dm_uncomp  dm_comp  
+hypothyroid  renal  liver pud  ah  lymphoma  cancer_met  cancer_nonmet  ra  coag  obesity  wtloss  
+fen  anemia_cbl  anemia_def  etoh  drug  psychoses  depression /*30 comorbids*/;
+RUN;
+
+
+/*Predicted mortality using logistic regression*/
+proc logistic data=vapd_daily20142017_20190426_v10   plots(maxpoints=none)=all;
+class  gender (ref="M")  race (ref="WHITE") hispanic (ref="1")
+chf_nonhp sepsis alcohol dysrhythmia pneumonia 
+copd coron_athero osteoarthros skin_infection chestpain 
+complic_devi uti diabmel_w_cm complic_proc acute_ren_fail 
+backproblem acute_mi adlt_resp_fl  gi_hemorrhag  Fluid_elc_dx
+Infect_parasitic_dis Neoplasms Endocrine blood_dis Mental_Illness nervous_dis circulatory respiratory
+digestive genitourinary pregnancy skin musculoskeletal Congenital_anomalies perinatal Injury_poisoning
+illdefined_conditions unclassified;
+model mort30_admit /*30-day mortality*/  (event='1')= AGE gender race hispanic
+/*lab APACHE III scores*/
+wbc_sc albval_sc bili_sc bun_sc glucose_sc 
+hct_sc na_sc pao2_sc ph_sc  creat_sc
+/*comorbodities indicators at bedsection, n=30*/
+htn  chf  cardic_arrhym  valvular_d2  pulm_circ  pvd  paralysis  neuro  pulm  dm_uncomp  dm_comp  
+hypothyroid  renal  liver pud  ah  lymphoma  cancer_met  cancer_nonmet  ra  coag  obesity  wtloss  
+fen  anemia_cbl  anemia_def  etoh  drug  psychoses  depression 
+/*top 20 diagnosis groups of single level and all of multi-level CCS*/
+chf_nonhp sepsis alcohol dysrhythmia pneumonia 
+copd coron_athero osteoarthros skin_infection chestpain 
+complic_devi uti diabmel_w_cm complic_proc acute_ren_fail 
+backproblem acute_mi adlt_resp_fl  gi_hemorrhag Fluid_elc_dx
+Infect_parasitic_dis Neoplasms Endocrine blood_dis Mental_Illness nervous_dis circulatory respiratory
+digestive genitourinary pregnancy skin musculoskeletal Congenital_anomalies perinatal Injury_poisoning
+illdefined_conditions unclassified;
+output out=VAPD20142017_risklog_20190426  /*what the outcome dataset is */
+predicted=pred_log; /*VA risk score variable, probablity of 30-day mortality*/
+run;
+/*c-statistic=0.854*/
+
+data missing; /*0*/
+set VAPD20142017_risklog_20190426;
+if pred_log=.;
+run;
+
+proc sgplot data=VAPD20142017_risklog_20190426 noautolegend;
+ histogram pred_log ;
+run;
+
+DATA vapd.VAPD20142017_risklog_20190426 (compress=yes);
+SET  VAPD20142017_risklog_20190426;
+RUN;
+
+/*can left join variable: pred_log back to VAPD dataset*/
+
+
+
+
