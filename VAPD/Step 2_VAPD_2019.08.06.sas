@@ -825,7 +825,7 @@ RUN;
 
 /*download and import CCS_MULTI_DX_TOOL_2015.CSV file*/
 PROC IMPORT OUT = my_icd9_csv
-          FILE = "W:\PERSONAL SHARE\Shirley Wang\Expanded VAPD\CCS\Multi-level\CCS_MULTI_DX_TOOL_2015.CSV"
+          FILE = "FOLDER PATH\CCS_MULTI_DX_TOOL_2015.CSV"
           DBMS = CSV
           REPLACE;
 RUN;
@@ -841,7 +841,7 @@ QUIT;
 /*download and import ccs_dx_icd10cm_2018_1.CSV file*/
 /*import csv file*/
 PROC IMPORT OUT = my_icd10_csv
-          FILE = "W:\PERSONAL SHARE\Shirley Wang\Expanded VAPD\CCS\Multi-level\ccs_dx_icd10cm_2018_1.CSV"
+          FILE = "FOLDER PATH\ccs_dx_icd10cm_2018_1.CSV"
           DBMS = CSV
           REPLACE;
 RUN;
