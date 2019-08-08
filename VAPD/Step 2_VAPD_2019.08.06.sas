@@ -886,9 +886,12 @@ QUIT;
 /*Sarah updated the Council for Teaching Hospital criteria for each sta6a facility, 2017-2018, use that for teaching indicator.
 This file is saved in */
 /*import csv file*/
-PROC IMPORT OUT = new_teaching
-          FILE = "I:\VA Sepsis\V. Identifiable Data\Shirley\Temp\sta6a_teaching_2017_2019.01.09.csv"
-          DBMS = CSV
+/*hospital Excel files (teaching indicator and region) are saved in VAPD Github folder, must be imported into SAS datasets first*/
+
+/*import csv file*/
+PROC IMPORT OUT = new_teaching /*named: hospital_teaching_indicators_20190109*/
+          FILE = ""
+          DBMS = 
           REPLACE;
 RUN;
 
@@ -903,7 +906,7 @@ run;
 
 /*sta6a=facility on site_level dataset & hosptal dataset,  sta3n=facility on level_beds, */
 DATA hospital_data ; /*1213*/
-SET hospital.hospital ;
+SET icu.hospital;
 RUN;
 
 DATA check_site ; /*missing regions*/
