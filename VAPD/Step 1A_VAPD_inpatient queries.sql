@@ -197,9 +197,6 @@ from #vapd_inpat--56,033,770
 select count(distinct patienticn) from dflt.vapd_inpat  
 select count(distinct inpatientsid) from dflt.vapd_inpat 
 
-select *
-from dflt.vapd_inpat
-where patientsid=13394842 and ordinalnumber=1 
-order by specialtytransferdatetime;
+
 
 /*Download dflt.vapd_inpat into a SAS dataset for further data management*/
