@@ -55,7 +55,7 @@ RUN;
 /*medications*/
 /*med_type=1 is vasopressors and all IV, med_type=2 is antibiotics (ABX)*/
 data pressors (compress=yes);
-retain patienticn inpatientsid datevalue hospital_day drugname_1-drugname_9;
+retain patienticn inpatientsid datevalue hospital_day pressor_1-pressor_5;
 set raw.vapd_daily&year._v23;
 keep patienticn inpatientsid hospital_day datevalue pressor_1-pressor_5;
 run;
