@@ -42,31 +42,31 @@ WHERE labchemtestname in ('PH', 'PH AT PT. TEMP', 'pH', 'PH (BLD GAS)', 'POC-pH'
 
 
 /*pull loincsids and labchemtestsids from CDW for 2014-2017*/
-SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
+SELECT distinct  a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
        a.LabChemTestSID, a.PatientSID, a.LabChemSpecimenDateTime, a.LabChemSpecimenDateSID, a.LabChemCompleteDateTime, a.LabChemCompleteDateSID,
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 into #pH2014_2017
 FROM  src.Chem_PatientLabChem AS A
 INNER JOIN #loinc b on  a.Loincsid=b.Loincsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-	WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+	WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01' and a.CohortName='Cohort20210503'
 
 UNION
 
-SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
+SELECT distinct  a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
        a.LabChemTestSID, a.PatientSID, a.LabChemSpecimenDateTime, a.LabChemSpecimenDateSID, a.LabChemCompleteDateTime, a.LabChemCompleteDateSID,
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE /*loincsid=-1 and */ a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+     WHERE /*loincsid=-1 and */ a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01' and a.CohortName='Cohort20210503'
 
 
 /*get unique PatientICN*/
-select a.*, b.PatientICN
+select distinct  a.*, b.PatientICN
 into dflt.pH2014_2017_12062018
 from #pH2014_2017 a
-left join src.CohortCrosswalk b on a.patientsid=b.PatientSID
+left join Src.SPatient_SPatient b on a.patientsid=b.PatientSID
 
 --download dflt talbe into a SAS table to do further data management
 drop table dflt.pH2014_2017_12062018 
@@ -106,31 +106,31 @@ WHERE labchemtestname in ('PO2', 'PO2 AT PT. TEMP', 'pO2','POC-pO2', 'PO2 (POC)'
 
 
 /*pull loincsids and labchemtestsids from CDW for 2014-2017*/
-SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
+SELECT distinct a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
        a.LabChemTestSID, a.PatientSID, a.LabChemSpecimenDateTime, a.LabChemSpecimenDateSID, a.LabChemCompleteDateTime, a.LabChemCompleteDateSID,
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 into #pO22014_2017
 FROM  src.Chem_PatientLabChem AS A
 INNER JOIN #loinc b on  a.Loincsid=b.Loincsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-	WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+	WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01' and a.CohortName='Cohort20210503'
 
 UNION
 
-SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
+SELECT distinct a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
        a.LabChemTestSID, a.PatientSID, a.LabChemSpecimenDateTime, a.LabChemSpecimenDateSID, a.LabChemCompleteDateTime, a.LabChemCompleteDateSID,
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE  /* loincsid=-1 and */  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+     WHERE  /* loincsid=-1 and */  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01' and a.CohortName='Cohort20210503'
 
 
 /*get unique PatientICN*/
-select a.*, b.PatientICN
+select distinct a.*, b.PatientICN
 into dflt.pO22014_2017_10112018
 from #pO22014_2017 a
-left join src.CohortCrosswalk b on a.patientsid=b.PatientSID
+left join Src.SPatient_SPatient b on a.patientsid=b.PatientSID
 
 --(2526232 row(s) affected)
 
@@ -175,31 +175,31 @@ WHERE labchemtestname in ('PCO2', 'PCO2 AT PT. TEMP', 'pCO2', 'POC-pCO2', 'pCO2 
 
 
 /*pull loincsids and labchemtestsids from CDW for 2014-2017*/
-SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
+SELECT distinct a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
        a.LabChemTestSID, a.PatientSID, a.LabChemSpecimenDateTime, a.LabChemSpecimenDateSID, a.LabChemCompleteDateTime, a.LabChemCompleteDateSID,
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 into #pCO22014_2017
 FROM  src.Chem_PatientLabChem AS A
 INNER JOIN #loinc b on  a.Loincsid=b.Loincsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-	WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+	WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01' and a.CohortName='Cohort20210503'
 
 UNION
 
-SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
+SELECT distinct a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
        a.LabChemTestSID, a.PatientSID, a.LabChemSpecimenDateTime, a.LabChemSpecimenDateSID, a.LabChemCompleteDateTime, a.LabChemCompleteDateSID,
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #labtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-     WHERE  loincsid=-1 and  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+     WHERE  loincsid=-1 and  a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01' and a.CohortName='Cohort20210503'
 
 
 /*get unique PatientICN*/
-select a.*, b.PatientICN
+select distinct a.*, b.PatientICN
 into dflt.pCO22014_2017_11052018
 from #pCO22014_2017 a
-left join src.CohortCrosswalk b on a.patientsid=b.PatientSID
+left join Src.SPatient_SPatient b on a.patientsid=b.PatientSID
 
 --(2858253 row(s) affected)
 
