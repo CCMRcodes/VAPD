@@ -225,31 +225,31 @@ into dflt.troponin_labname_ss20190507
 from #PIselectlabtestnames
 
 --pull loincsids and labchemtestsids from CDW for 2014-2017
-SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
+SELECT distinct a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
        a.LabChemTestSID, a.PatientSID, a.LabChemSpecimenDateTime, a.LabChemSpecimenDateSID, a.LabChemCompleteDateTime, a.LabChemCompleteDateSID,
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 into #Troponin2014_2017
 FROM  src.Chem_PatientLabChem AS A
 INNER JOIN #loinc  b on  a.Loincsid=b.Loincsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
-	WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+	WHERE a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'  and a.CohortName='Cohort20210503' 
 
 UNION
 
-SELECT a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
+SELECT distinct a.LabChemSID, a.LabSubjectSID,  a.Sta3n, a.LabPanelIEN, a.LabPanelSID, a.LongAccessionNumberUID, a.ShortAccessionNumber,
        a.LabChemTestSID, a.PatientSID, a.LabChemSpecimenDateTime, a.LabChemSpecimenDateSID, a.LabChemCompleteDateTime, a.LabChemCompleteDateSID,
        a.LabChemResultValue, a.LabChemResultNumericValue, a.TopographySID, a.LOINCSID, a.Units, a.RefHigh, a.RefLow, d.Topography
 FROM src.Chem_PatientLabChem a         
 INNER JOIN #PIselectlabtestnames b ON a.labchemtestsid=b.labchemtestsid 
 LEFT JOIN [CDWWork].[Dim].[topography] AS d ON A.TopographySID =D.TopographySID
      WHERE /*loincsid=-1 and */  
-      a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'
+      a.LabChemSpecimenDateTime >= '2014-01-01' and a.LabChemSpecimenDateTime < '2018-01-01'  and a.CohortName='Cohort20210503' 
 
 --get unique PatientICN & save into dflt table
-select a.*, b.PatientICN
+select distinct a.*, b.PatientICN
 into dflt.Troponin_20142017_sms20190322
 from #Troponin2014_2017 a
-left join src.CohortCrosswalk b on a.patientsid=b.PatientSID
+left join Src.SPatient_SPatient b on a.patientsid=b.PatientSID
 -- (3,447,896 rows affected)	
 
 --compress table
@@ -260,3 +260,5 @@ with
 
 --download dflt table into a SAS table to do further data management in SAS program:
 --"step2_Troponin_I_T_2014_2017"
+--then
+drop table dflt.Troponin_20142017_sms20190322
